@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Header/Navbar.jsx";
 import Hero from "./components/Hero.jsx";
 import Card from "./components/Card.jsx";
-import img from "./assets/Hero2.png"
 import CardContainer from "./components/CardContainer.jsx";
 import Footer from "./components/Footer/Footer.jsx";
 import HowItWorks from "./components/HowItWorks.jsx";

@@ -3,6 +3,9 @@ import jwt from 'jsonwebtoken'
 
 export const verifyJWT = async (req, res, next) => {
     try {
+        if (req.path === "/verify-email") {
+            return next(); // skip auth
+        }
         const token =
             req.cookies?.accessToken ||
             req.header('Authorization')?.replace("Bearer ", "");
@@ -24,7 +27,7 @@ export const verifyJWT = async (req, res, next) => {
 
         req.user = result.rows[0];
         next();
-    } 
+    }
     catch (err) {
         console.error("JWT verification failed:", err.message);
         return res.status(401).json({ message: "Unauthorized or Expired Token" });

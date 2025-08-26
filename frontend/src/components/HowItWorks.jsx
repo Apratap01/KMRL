@@ -30,7 +30,7 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className="w-full bg-gradient-to-r from-[#03070e] to-[#060558] py-[10%] px-6 flex flex-col items-center px-4">
+    <section className="w-full bg-gradient-to-r from-[#03070e] to-[#050448] py-[10%] px-6 flex flex-col items-center px-4">
       {/* Section Heading */}
       <motion.h2
         className="text-white text-[clamp(1.8rem,4vw,3rem)] font-extrabold tracking-wider text-center mb-12"

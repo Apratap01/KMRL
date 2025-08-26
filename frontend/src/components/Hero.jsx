@@ -2,7 +2,7 @@ import heroImg from "../assets/hero2.png"; // adjust path if needed
 
 export default function Hero() {
   return (
-    <section className="bg-gradient-to-r from-[#03070e] to-[#060558] min-h-[calc(100vh-4rem)] flex items-center py-16">
+    <section className="bg-gradient-to-r from-[#03070e] to-[#050448] min-h-[calc(100vh-4rem)] flex items-center py-16">
 
       <div
         className="grid max-w-screen-xl w-full px-4 py-16 mx-auto lg:gap-8 xl:gap-0 lg:py-24 lg:grid-cols-12"

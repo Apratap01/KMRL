@@ -2,7 +2,7 @@ import { FaGithub, FaTwitter, FaLinkedin } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-r from-[#141414] to-[#03004f] text-gray-300 py-10 px-6">
+    <footer className="bg-gradient-to-r from-[#03070e] to-[#050448] text-gray-300 py-10 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Brand / Logo */}
         <div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import {motion}  from "framer-motion";
 
 function CardContainer() {
   const functionalities = [
@@ -30,7 +30,7 @@ function CardContainer() {
   ];
 
   return (
-    <section className="w-full py-20 bg-gradient-to-r from-[#03070e] to-[#060558]  px-4">
+    <section className="w-full py-20 bg-gradient-to-r from-[#03070e] to-[#050448]  px-4">
       <div className="max-w-7xl mx-auto px-6">
         <motion.h2
           className="text-4xl font-bold text-white text-center mb-16 tracking-wide"

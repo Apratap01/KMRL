@@ -34,12 +34,37 @@ function Signup() {
       console.log(res)
       console.log(res.status)
       console.log(res.data)
-      
+
+      const { email, name, password } = inputValue;
+
+      if(!name){
+        console.log("Name is required");
+        toast.error("Name is required");
+        return; // stop execution
+      }
+      if(!password){
+        console.log("Password is required");
+        toast.error("Password is required");
+        return; // stop execution
+      }
+      if(password.length < 6){
+        console.log("Password must be at least 6 characters");
+        toast.error("Password must be at least 6 characters");
+        return; // stop execution
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        console.log("Please enter a valid email");
+        toast.error("Please enter a valid email");
+        return; // stop execution
+      }
 
       if (res.status === 201) {
         Navigate("/login")
         toast.success("Registration Successful! Please verify your email.")
       }
+      
 
     } catch (error) {
       console.log(error)

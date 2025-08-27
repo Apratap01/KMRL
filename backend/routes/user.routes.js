@@ -7,6 +7,7 @@ import { emailVerification } from '../controllers/user.verify_email.controller.j
 import { userLogout } from '../controllers/user.logout.controller.js'
 import { refreshToken } from '../controllers/user.refresh.controller.js'
 import { resendVerification } from '../controllers/user.resend_verification.controller.js'
+import { fetchUserData } from '../controllers/user.controller.js'
 
 
 dotenv.config()
@@ -19,6 +20,7 @@ router.get('/verify-email',emailVerification);
 router.post('/logout', verifyJWT,userLogout);
 router.post('/refresh',refreshToken)
 router.post("/resend-verification", resendVerification);
+router.get('/fetch-user-data',verifyJWT,fetchUserData)
 
 export default router;
 

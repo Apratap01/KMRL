@@ -27,9 +27,9 @@ export const loginUser = async (req, res) => {
             return res.status(400).json({ 'message': 'Invalid Credentials' })
         }
 
-        if (!existingUser.rows[0].is_valid) {
-            return res.status(403).json({ message: "Please verify your email first" });
-        }
+        // if (!existingUser.rows[0].is_valid) {
+        //     return res.status(403).json({ message: "Please verify your email first" });
+        // }
 
         const accessToken = generateAccessToken(existingUser.rows[0])
         const refreshToken = generateRefreshToken(existingUser.rows[0])
@@ -46,7 +46,7 @@ export const loginUser = async (req, res) => {
 
 
         const loggedInUser = await pool.query(
-            "SELECT id,email,name FROM users WHERE email = $1",
+            "SELECT id,email,name,is_valid FROM users WHERE email = $1",
             [email]
         );
 

@@ -12,6 +12,7 @@ import store from "./redux/store";
 
 import "./index.css"; // Tailwind/global styles
 import { Toaster } from "sonner";
+import VerifyEmail from "./components/VerifyEmail";
 
 // Define routes
 const router = createBrowserRouter([
@@ -31,6 +32,11 @@ const router = createBrowserRouter([
         path: "signup",
         element: <Signup/>,
       },
+      {
+        path:"verifyemail",
+        element:<VerifyEmail/>
+      }
+      
     ],
   },
 ]);
@@ -39,7 +45,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store = {store}>
       <RouterProvider router={router} />
-      <Toaster />
+      <Toaster position="top-center" />
     </Provider>
   </React.StrictMode>
 );

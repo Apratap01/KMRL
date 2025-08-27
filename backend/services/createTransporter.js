@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer'
 import dotenv from 'dotenv'
 dotenv.config()
 export const createTransporter = async () => {
-    if (true) {
+    if (false) {
         // In production, use Gmail, Mailtrap, etc.
         return nodemailer.createTransport({
             service: "gmail",

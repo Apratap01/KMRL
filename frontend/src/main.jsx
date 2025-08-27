@@ -7,6 +7,9 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
+import {Provider} from "react-redux";
+import store from "./redux/store";
+
 import "./index.css"; // Tailwind/global styles
 
 // Define routes
@@ -33,6 +36,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <Provider store = {store}>
+      <RouterProvider router={router} />
+    </Provider>
   </React.StrictMode>
 );

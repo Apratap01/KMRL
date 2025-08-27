@@ -4,6 +4,8 @@ import AuthCard from "../components/AuthCard";
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
 
+  
+
   return (
     <AuthCard
       title="Signup"

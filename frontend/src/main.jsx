@@ -33,7 +33,7 @@ const router = createBrowserRouter([
         element: <Signup/>,
       },
       {
-        path:"verifyemail",
+        path:"resend-verification",
         element:<VerifyEmail/>
       }
       

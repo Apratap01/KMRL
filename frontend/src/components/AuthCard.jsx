@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 function AuthCard({ title, children, googleText, footerText, footerLink, footerHref }) {
   return (
-    <div className="flex justify-center items-center px-6 py-12 w-full  min-h-screen">
+    <div className="bg-gradient-to-r from-[#03070e] to-[#050448] flex justify-center items-center px-6 py-12 w-full  min-h-screen">
       <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-lg max-w-md w-full text-white">
         <h2 className="text-3xl font-bold mb-6 text-center">{title}</h2>
 

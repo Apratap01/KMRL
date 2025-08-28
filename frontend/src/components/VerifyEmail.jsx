@@ -2,16 +2,43 @@
 import { useState } from "react";
 import { Mail } from "lucide-react"; 
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setLoading } from "../redux/authSlice";
+import { toast } from "sonner";
+import axios from "axios";
+import { USER_API_ENDPOINT } from "../../utils/constants";
 
 function VerifyEmail() {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+  const { loading } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email) return;
-    // here you would call your API for sending verification email
-    setSent(true);
+    try {
+      dispatch(setLoading(true));
+
+      const res = await axios.post(
+        `${USER_API_ENDPOINT}/resend-verification`,
+        { email },
+        { withCredentials: true }
+      );
+
+      if (res.status === 200) {
+        toast.success(res?.data?.message || "Verification email sent");
+        setEmail(""); // clear field after success
+        navigate("/login");
+      }
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Something went wrong. Try again!";
+      toast.error(message);
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
   return (
@@ -33,33 +60,24 @@ function VerifyEmail() {
           Enter your email address and we’ll send you a verification link.
         </p>
 
-        {!sent ? (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-              className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition text-white font-medium shadow-md"
-            >
-              Send Verification Link
-            </button>
-          </form>
-        ) : (
-          <motion.div
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="text-green-400 font-medium"
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+            className="w-full px-4 py-2 rounded-lg bg-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition text-white font-medium shadow-md"
           >
-            ✅ Verification link sent! Check your inbox.
-          </motion.div>
-        )}
+            {loading ? "Sending..." : "Send Verification Link"}
+          </button>
+        </form>
       </motion.div>
     </section>
   );

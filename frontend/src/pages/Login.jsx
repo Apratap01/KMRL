@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import AuthCard from "../components/AuthCard.jsx";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setLoading } from "../redux/authSlice.js";
+import { setLoading, setUser } from "../redux/authSlice.js";
 import { USER_API_ENDPOINT } from "../../utils/constants.js";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
@@ -31,22 +31,24 @@ function Login() {
         withCredentials:true,
       }
       );
-      console.log(res);
-      console.log(res.status);
-      console.log(res.data);
-      console.log(typeof res.data.user.is_valid);
+      // console.log(res);
+      // console.log(res.status);
+      // console.log(res.data);
+      // console.log(typeof res.data.user.is_valid);
       if(!(res.data.user.is_valid)){
-        navigate("/verifyemail")
+        navigate("/resend-verification")
         toast.message("Please Verify Your email");
       }
 
       // Example navigation after login
       else if (res.status === 200) {
         toast.success("Login Successfull")
+        dispatch(setUser(res.data.user))
         navigate("/"); 
       }
     } catch (error) {
-       toast.error("Credentials are wrong")
+       console.log(error)
+      toast.error(error?.response?.data?.message || "Something went wrong")
 
     } finally {
       dispatch(setLoading(false));

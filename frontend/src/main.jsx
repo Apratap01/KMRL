@@ -6,22 +6,30 @@ import Layout from "./Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Test from "./pages/Test";
 
-import {Provider} from "react-redux";
+import {Provider, useDispatch} from "react-redux";
 import store from "./redux/store";
 
-import "./index.css"; 
+import "./index.css"; // Tailwind/global styles
 import { Toaster } from "sonner";
 import VerifyEmail from "./components/VerifyEmail";
+import ProtectedRoute from "./components/ProtectedRoute";
+import axios from "axios";
+import { USER_API_ENDPOINT } from "../utils/constants";
+import AppInitializer from "./AppInitializer";
 
 
+
+
+// Define routes
 const router = createBrowserRouter([
   {
-    path: "/", 
-    element: <Layout />, 
+    path: "/", // root path
+    element: <Layout />, // layout wraps all pages
     children: [
       {
-        index: true, 
+        index: true, // default page at "/"
         element: <Home />,
       },
       {
@@ -35,6 +43,10 @@ const router = createBrowserRouter([
       {
         path:"resend-verification",
         element:<VerifyEmail/>
+      },
+      {
+        path:"test",
+        element:<ProtectedRoute><Test/></ProtectedRoute>
       }
       
     ],
@@ -44,8 +56,10 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store = {store}>
+      <AppInitializer>
       <RouterProvider router={router} />
       <Toaster position="top-center" />
+      </AppInitializer>
     </Provider>
   </React.StrictMode>
 );

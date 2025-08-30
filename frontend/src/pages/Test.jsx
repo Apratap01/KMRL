@@ -10,7 +10,7 @@ function Test() {
       <div>Test page for user login</div>
       <div>
         {user
-          ? <div>Logged in as: {user?.name} ({user?.email})</div>
+          ? <div>Logged in as: {user?.name || user?.data?.name} ({user?.email || user?.data?.email})</div>
           : <div>No user logged in</div>
         }
       </div>

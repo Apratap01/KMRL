@@ -45,14 +45,14 @@ export default function HowItWorks() {
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 max-w-6xl">
         {steps.map((step, index) => (
           <motion.div
-            key={index}
-            className="bg-gradient-to-br from-[#1a1f3c]/80 to-[#0a0e2e]/80 
-                        backdrop-blur-xl rounded-2xl p-6 flex flex-col items-center 
-                        text-center shadow-lg border border-white/10 
-                        hover:scale-105 transition-transform duration-300"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.2 }}
+              key={index}
+              className="bg-gradient-to-br from-[#1a1f3c]/80 to-[#0a0e2e]/80 
+                          backdrop-blur-xl rounded-2xl p-6 flex flex-col items-center 
+                          text-center shadow-lg border border-white/10 
+                          hover:scale-105 transition-transform duration-300"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: index * 0.2 }}
             >
             <div className="mb-4">{step.icon}</div>
             <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>

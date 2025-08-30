@@ -1,9 +1,6 @@
-// AppInitializer.jsx
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setUser } from "./redux/authSlice";
-import axios from "axios";
-import { USER_API_ENDPOINT } from "../utils/constants";
+import { setUser, setLoading } from "./redux/authSlice";
 import { getUser } from "../utils/getUser";
 
 export default function AppInitializer({ children }) {
@@ -11,12 +8,24 @@ export default function AppInitializer({ children }) {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const user = await getUser();
-      if (user) {
-        dispatch(setUser(user));
+      try {
+        dispatch(setLoading(true));
+        const user = await getUser(); // this should hit /me with cookies
+        if (user) {
+          dispatch(setUser(user));
+        } else {
+          dispatch(setUser(null));
+        }
+      } catch (err) {
+        console.error("Failed to restore user:", err);
+        dispatch(setUser(null));
+      } finally {
+        dispatch(setLoading(false));
       }
     };
+
     fetchUser();
   }, [dispatch]);
-  return children; // render rest of app after trying fetch
+
+  return children;
 }

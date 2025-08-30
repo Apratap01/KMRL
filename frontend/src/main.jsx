@@ -1,21 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-
 import Layout from "./Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Test from "./pages/Test";
-
-import {Provider, useDispatch} from "react-redux";
 import store from "./redux/store";
-
+import {Provider} from "react-redux";
 import "./index.css"; // Tailwind/global styles
 import { Toaster } from "sonner";
 import VerifyEmail from "./components/VerifyEmail";
 import ProtectedRoute from "./components/ProtectedRoute";
-import axios from "axios";
 import { USER_API_ENDPOINT } from "../utils/constants";
 import AppInitializer from "./AppInitializer";
 

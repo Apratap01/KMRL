@@ -1,19 +1,16 @@
-import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
 
 export default function ProtectedRoute({ children }) {
   const { user, loading } = useSelector((state) => state.auth);
 
-  // while fetching user from /api/me
   if (loading) {
-    return <h2 className="text-center mt-10">Loading...</h2>;
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
-  // if not logged in → go to login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // if logged in → render the protected component
   return children;
 }

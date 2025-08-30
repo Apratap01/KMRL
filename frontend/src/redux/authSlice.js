@@ -1,9 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  loading: false,
-  user: null, // will be filled by getUser() after refresh
+  loading: true, // start as true (important!)
+  user: null,
 };
+
 
 const authSlice = createSlice({
   name: "auth",

@@ -2,6 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import { connectDB } from './config/db.js'
 import {router as userRouter} from './routes/user.routes.js'
+import {router as docsRouter} from './routes/docs.routes.js'
 import cookieParser from 'cookie-parser'
 import cors from "cors";
 
@@ -23,12 +24,10 @@ app.get('/',(req,res)=>{
     res.send('Welcome to Backend')
 })
 
-
-
 connectDB()
 
-
 app.use('/api/user',userRouter)
+app.use('/api/docs',docsRouter)
 
 
 app.listen(PORT,()=>{

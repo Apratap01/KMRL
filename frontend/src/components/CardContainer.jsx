@@ -1,5 +1,5 @@
 import React from "react";
-import {motion}  from "framer-motion";
+import { motion } from "framer-motion";
 
 function CardContainer() {
   const functionalities = [
@@ -30,12 +30,12 @@ function CardContainer() {
   ];
 
   return (
-    <section className="w-full py-20 bg-gradient-to-r from-[#03070e] to-[#050448]  px-4">
+    <section className="w-full py-20 bg-gradient-to-r from-[#03070e] to-[#050448] px-4">
       <div className="max-w-7xl mx-auto px-6">
         <motion.h2
           className="text-4xl font-bold text-white text-center mb-16 tracking-wide"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
           Our Functionalities
@@ -49,14 +49,18 @@ function CardContainer() {
                          backdrop-blur-xl rounded-2xl p-6 flex flex-col items-center 
                          text-center shadow-lg border border-white/10 
                          hover:scale-105 transition-transform duration-300"
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: index * 0.2 }}
               whileHover={{ y: -10 }}
             >
               <div className="text-5xl mb-4">{item.icon}</div>
-              <h3 className="text-xl font-semibold text-white mb-3">{item.title}</h3>
-              <p className="text-gray-300 text-sm leading-relaxed">{item.description}</p>
+              <h3 className="text-xl font-semibold text-white mb-3">
+                {item.title}
+              </h3>
+              <p className="text-gray-300 text-sm leading-relaxed">
+                {item.description}
+              </p>
             </motion.div>
           ))}
         </div>

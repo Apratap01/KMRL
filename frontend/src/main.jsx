@@ -10,18 +10,18 @@ import Signup from "./pages/Signup";
 import {Provider} from "react-redux";
 import store from "./redux/store";
 
-import "./index.css"; // Tailwind/global styles
+import "./index.css"; 
 import { Toaster } from "sonner";
 import VerifyEmail from "./components/VerifyEmail";
 
-// Define routes
+
 const router = createBrowserRouter([
   {
-    path: "/", // root path
-    element: <Layout />, // layout wraps all pages
+    path: "/", 
+    element: <Layout />, 
     children: [
       {
-        index: true, // default page at "/"
+        index: true, 
         element: <Home />,
       },
       {

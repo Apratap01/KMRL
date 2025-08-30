@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import heroImg from "../assets/hero2.png"; // adjust path if needed
 
 export default function Hero() {
@@ -6,12 +7,12 @@ export default function Hero() {
 
       <div
         className="grid max-w-screen-xl w-full px-4 py-16 mx-auto lg:gap-8 xl:gap-0 lg:py-24 lg:grid-cols-12"
-        // style={{ backgroundImage: `url(${heroImg})` }}
+      // style={{ backgroundImage: `url(${heroImg})` }}
       >
         {/* Left Content */}
         <div className="mr-auto place-self-center lg:col-span-7 text-center lg:text-left bg-black/60 lg:bg-transparent p-6 rounded-xl lg:p-0">
           <h1 className="max-w-2xl mb-6 text-4xl font-extrabold tracking-tight leading-tight md:text-5xl xl:text-6xl text-white">
-            Manage & Chat with <br className="hidden md:block" /> 
+            Manage & Chat with <br className="hidden md:block" />
             Your Legal Documents
           </h1>
           <p className="max-w-2xl mb-6 font-light text-gray-300 md:text-lg lg:text-xl">
@@ -20,18 +21,18 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-            <a
-              href="#"
+            <Link
+              to="/test"
               className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
             >
               Get Started →
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="#"
               className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white border border-gray-500 rounded-lg hover:bg-gray-800"
             >
               Learn More
-            </a>
+            </Link>
           </div>
         </div>
 

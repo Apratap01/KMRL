@@ -5,8 +5,10 @@ import dotenv from "dotenv";
 import { S3Client, PutObjectCommand,GetObjectCommand } from "@aws-sdk/client-s3";
 import { pool } from "../config/db.js";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-
+import axios from 'axios'
+import path from 'path'
 dotenv.config();
+import fs from 'fs'
 
 export const router = Router();
 
@@ -15,13 +17,31 @@ const regionName = process.env.AWS_REGION;
 const accessKey = process.env.AWS_ACCESS_KEY;
 const secretKey = process.env.AWS_SECRET_KEY;
 
-const s3 = new S3Client({
+export const s3 = new S3Client({
   credentials: {
     accessKeyId: accessKey,
     secretAccessKey: secretKey,
   },
   region: regionName,
 });
+
+async function downloadFileFromSignedUrl(signedUrl, destPath) {
+  const writer = fs.createWriteStream(destPath);
+  const response = await axios({
+    url: signedUrl,
+    method: "GET",
+    responseType: "stream",
+  });
+
+  response.data.pipe(writer);
+
+  return new Promise((resolve, reject) => {
+    writer.on("finish", () => resolve(destPath));
+    writer.on("error", reject);
+  });
+}
+
+const localFilePath = path.join(process.cwd(), "uploads", "document.pdf");
 
 // upload.single('docs') => "docs" should match <input type="file" name="docs" />
 router.post("/upload", verifyJWT, upload.single("docs"), async (req, res) => {
@@ -86,17 +106,6 @@ router.get('/:id/preview',verifyJWT,async(req,res)=>{
             return res.status(400).json({"message":"Send id for docs"})
         }
         const resultDocs = await pool.query(`SELECT file_key FROM docs WHERE user_id = $1 AND id = $2 `,[userId,docId])
-        // for(const docs of resultDocs.rows){
-        //     console.log(docs)
-        //     const getObjectParams = {
-        //         Bucket:bucketName,
-        //         Key:docs.file_key
-        //     }
-        //     console.log(getObjectParams)
-        //     const command = new GetObjectCommand(getObjectParams)
-        //     const url = await getSignedUrl(s3,command,{expiresIn:3600})
-        //     docs.url = url
-        // }
         const getObjectParams = {
                 Bucket:bucketName,
                 Key:resultDocs.rows[0].file_key

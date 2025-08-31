@@ -14,7 +14,7 @@ import VerifyEmail from "./components/VerifyEmail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { USER_API_ENDPOINT } from "../utils/constants";
 import AppInitializer from "./AppInitializer";
-
+import LegalDocDashboard from "./components/LegalDocDashboard";
 
 
 
@@ -43,6 +43,10 @@ const router = createBrowserRouter([
       {
         path:"test",
         element:<ProtectedRoute><Test/></ProtectedRoute>
+      },
+      {
+        path:"LegalDocDashboard",
+        element:<ProtectedRoute><LegalDocDashboard/></ProtectedRoute>
       }
       
     ],

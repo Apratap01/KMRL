@@ -5,7 +5,6 @@ import Layout from "./Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Test from "./pages/Test";
 import store from "./redux/store";
 import {Provider} from "react-redux";
 import "./index.css"; // Tailwind/global styles
@@ -39,10 +38,6 @@ const router = createBrowserRouter([
       {
         path:"resend-verification",
         element:<VerifyEmail/>
-      },
-      {
-        path:"test",
-        element:<ProtectedRoute><Test/></ProtectedRoute>
       },
       {
         path:"LegalDocDashboard",

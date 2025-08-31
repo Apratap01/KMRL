@@ -58,7 +58,7 @@ export default function Navbar() {
         <div className="hidden md:flex space-x-4">
           <button
             onClick={logOutHandler}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:opacity-90"
+            className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:opacity-90 hover:cursor-pointer"
           >
             Logout
           </button>

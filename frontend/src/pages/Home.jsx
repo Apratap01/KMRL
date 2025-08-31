@@ -5,7 +5,7 @@ import HowItWorks from "../components/HowItWorks"
 
 function Home() {
   return (
-     <div className="bg-[#121212] min-h-screen w-screen text-white font-poppins">
+     <div className="bg-gradient-to-r from-[#03070e] to-[#050448] min-h-screen w-full text-white font-poppins">
       <Hero/>
       <CardContainer/>
       <HowItWorks/>

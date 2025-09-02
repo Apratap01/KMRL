@@ -86,7 +86,7 @@ router.post("/upload", verifyJWT, upload.single("docs"), async (req, res) => {
 router.get('/get-all-docs',verifyJWT,async(req,res)=>{
     try {
         const userId = req.user.id
-        const resultDocs = await pool.query(`SELECT title,file_type,uploaded_at FROM docs where user_id = $1`,[userId])
+        const resultDocs = await pool.query(`SELECT id,title,file_type,uploaded_at FROM docs where user_id = $1`,[userId])
         return res.status(200).json({"result":resultDocs.rows})
     } 
     catch (error) {

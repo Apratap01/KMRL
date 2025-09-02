@@ -14,6 +14,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { USER_API_ENDPOINT } from "../utils/constants";
 import AppInitializer from "./AppInitializer";
 import LegalDocDashboard from "./components/LegalDocDashboard";
+import MyDocuments from "./components/MyDocuments";
 
 
 
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path:"LegalDocDashboard",
         element:<ProtectedRoute><LegalDocDashboard/></ProtectedRoute>
+      },
+      {
+        path:"documents",
+        element:<ProtectedRoute><MyDocuments/></ProtectedRoute>
       }
       
     ],

@@ -9,6 +9,8 @@ import axios from 'axios'
 import path from 'path'
 dotenv.config();
 import fs from 'fs'
+import { runTask } from "../services/schedulerService.js"; // New import for the scheduler
+
 
 export const router = Router();
 
@@ -24,6 +26,9 @@ export const s3 = new S3Client({
   },
   region: regionName,
 });
+
+
+const FASTAPI_URL = 'http://localhost:8000'; // Define FastAPI URL
 
 async function downloadFileFromSignedUrl(signedUrl, destPath) {
   const writer = fs.createWriteStream(destPath);
@@ -63,6 +68,25 @@ router.post("/upload", verifyJWT, upload.single("docs"), async (req, res) => {
     await s3.send(command);
 
     const userId = req.user.id;
+    let lastDate= null; // Initialize lastdate
+    
+    // --- NEW: Call FastAPI to extract the last date ---
+    try {
+        const formData = new FormData();
+        formData.append('file', req.file.buffer, req.file.originalname);
+
+        const dateResponse = await axios.post(`${FASTAPI_URL}/extract-last-date/`, formData, {
+            headers: {
+                ...formData.getHeaders(),
+            },
+        });
+        lastDate = dateResponse.data.last_date;
+        console.log(`Extracted last date: ${lastDate}`);
+    } catch (llmError) {
+        console.error("Error extracting date from document:", llmError.message);
+    }
+    // --- END NEW ---
+
 
     const query = `
       INSERT INTO docs (user_id, title, file_key, file_type)
@@ -72,6 +96,13 @@ router.post("/upload", verifyJWT, upload.single("docs"), async (req, res) => {
     const values = [userId, req.file.originalname, fileKey, req.file.mimetype];
 
     const result = await pool.query(query, values);
+    
+    // --- NEW: Schedule a task for email notification if a date was found ---
+    if (lastDate) {
+        await runTask(userId, result.rows[0].id, lastDate);
+    }
+    // --- END NEW ---
+
 
     return res.status(201).json({
       message: "File uploaded successfully",

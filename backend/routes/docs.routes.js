@@ -7,12 +7,13 @@ import { pool } from "../config/db.js";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import axios from 'axios'
 import path from 'path'
-dotenv.config();
+import FormData from "form-data";
 import fs from 'fs'
-import { runTask } from "../services/schedulerService.js"; // New import for the scheduler
+
 
 
 export const router = Router();
+dotenv.config();
 
 const bucketName = process.env.AWS_BUCKET_NAME;
 const regionName = process.env.AWS_REGION;
@@ -98,15 +99,18 @@ router.post("/upload", verifyJWT, upload.single("docs"), async (req, res) => {
     const result = await pool.query(query, values);
     
     // --- NEW: Schedule a task for email notification if a date was found ---
+    console.log(typeof(lastDate))
+    const isoDate = new Date(lastDate).toISOString();
     if (lastDate) {
-        await runTask(userId, result.rows[0].id, lastDate);
+        await pool.query(`UPDATE docs SET last_date = $1 WHERE id = $2`,[isoDate,result.rows[0].id]) 
+        // await runTask(userId, result.rows[0].id, lastDate);
     }
     // --- END NEW ---
 
-
+    const finalResult = await pool.query(`SELECT * FROM docs WHERE id = $1`,[result.rows[0].id])
     return res.status(201).json({
       message: "File uploaded successfully",
-      doc: result.rows[0],
+      doc: finalResult.rows[0],
     });
   } catch (error) {
     console.error("Upload error:", error);

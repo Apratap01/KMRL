@@ -3,9 +3,11 @@ import dotenv from 'dotenv'
 import { connectDB } from './config/db.js'
 import {router as userRouter} from './routes/user.routes.js'
 import {router as docsRouter} from './routes/docs.routes.js'
+import {router as chatRouter} from './routes/chat.routes.js'
 import cookieParser from 'cookie-parser'
 import cors from "cors";
 import summaryRouter from './routes/summary.routes.js'
+
 
 dotenv.config()
 
@@ -30,6 +32,7 @@ connectDB()
 app.use('/api/user',userRouter)
 app.use('/api/docs',docsRouter)
 app.use('/api/summary',summaryRouter)
+app.use('/api/chat',chatRouter)
 
 
 app.listen(PORT,()=>{

@@ -212,7 +212,7 @@ const fetchSummary = async (docId, languageCode) => {
             </p>
           </div>
         ) : (
-          <div className="space-y-2 h-full overflow-y-auto pr-2">
+          <div className="space-y-2 h-full overflow-y-auto pr-2  scrollbar-hide">
             {docs.map((doc) => (
               <div
                 key={doc.id}
@@ -220,7 +220,7 @@ const fetchSummary = async (docId, languageCode) => {
                   selectedDoc?.id === doc.id
                     ? "bg-gradient-to-r from-purple-100 to-indigo-100 border-indigo-400/50"
                     : "bg-gradient-to-r from-white to-indigo-50 border-transparent hover:from-indigo-50 hover:to-purple-50"
-                }`}
+                } ${showLanguageDropdown ? "ring-1 ring-blue-400 shadow-md" : ""}`}
                 onClick={() => handleDocumentSelect(doc)}
               >
                 <div className="flex items-center gap-4">
@@ -252,7 +252,7 @@ const fetchSummary = async (docId, languageCode) => {
 
   const SummaryViewer = () => (
     <div className="h-full flex flex-col">
-      <div className="h-full overflow-y-auto bg-gradient-to-r from-pink-100 via-pink-50 to-blue-100 rounded-xl border border-gray-200/40 shadow-md">
+      <div className="h-full overflow-y-auto bg-gradient-to-r from-pink-100 via-pink-50 to-blue-100 rounded-xl border border-gray-200/40 shadow-md scrollbar-hide">
         <div className="p-6 flex flex-col">
           {selectedDoc ? (
             <>
@@ -264,7 +264,7 @@ const fetchSummary = async (docId, languageCode) => {
                       {selectedDoc.title}
                     </h1>
                     <div className="flex flex-col gap-1 text-sm text-gray-600 dark:text-gray-400">
-  {/* First Row: File Type + Upload Date */}
+                      {/* First Row: File Type + Upload Date */}
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1">
                           <File className="w-4 h-4" />
@@ -290,7 +290,7 @@ const fetchSummary = async (docId, languageCode) => {
                   {/* LANGUAGE DROPDOWN */}
                   <div className="relative">
                     <button
-                      className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors border border-gray-200/20"
+                      className="flex items-center gap-2 px-4  py-2 shadow-lg hover:bg-gray-100 transition bg-white/20 hover:bg-white/30 rounded-lg transition-colors border border-gray-200/20"
                       onClick={() =>
                         setShowLanguageDropdown(!showLanguageDropdown)
                       }
@@ -534,14 +534,19 @@ const fetchSummary = async (docId, languageCode) => {
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center min-h-[600px]">
+            <div className="flex items-center justify-center min-h-[550px] overflow-hidden">
               <div className="text-center space-y-6">
                 <FileText className="w-24 h-24 text-gray-400 mx-auto" />
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">
                   Select a Document
                 </h2>
                 <p className="text-3xl font-bold text-gray-900 mb-4">
-                  Choose a document from the left panel to view its summary
+                  <span className="hidden sm:inline">
+                    Choose a document from the left panel to view its summary
+                  </span>
+                  <span className="inline sm:hidden">
+                    Choose a document from the top bar to view its summary
+                  </span>
                 </p>
               </div>
             </div>

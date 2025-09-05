@@ -2,9 +2,10 @@ import React, { useState, useRef } from 'react';
 import { Upload, Sparkles, MessageCircle, FileText, Bot, Eye, FolderOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useSelector } from 'react-redux'; 
+import {  useDispatch , useSelector } from 'react-redux'; 
 import { toast } from "sonner";
 import { DOCS_API_ENDPOINT } from "../../utils/constants.js";
+import {setRecentDoc} from "../redux/authSlice.js"
 
 const LegalDocDashboard = () => {
   const [dragActive, setDragActive] = useState(false);
@@ -15,6 +16,7 @@ const LegalDocDashboard = () => {
 
   // get user from Redux store
   const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch()
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -60,8 +62,10 @@ const LegalDocDashboard = () => {
           },
         }
       );
-
-      setFile_id(res?.doc?.id);
+      console.log(res);
+      const uploadedDoc = res?.data?.doc;
+      setFile_id(uploadedDoc.id);
+      dispatch(setRecentDoc(uploadedDoc.id));
       setMessage("✅ File uploaded successfully!");
       console.log(res.data);
     } catch (err) {
@@ -162,7 +166,7 @@ const LegalDocDashboard = () => {
         {/* Features */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Chat with Document */}
-          <Link to="/chat">
+          <Link to="/chatbot">
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 
               hover:bg-white/10 transition-all duration-500 hover:scale-[1.02] 
               hover:shadow-2xl hover:shadow-purple-500/10 cursor-pointer h-full flex flex-col">

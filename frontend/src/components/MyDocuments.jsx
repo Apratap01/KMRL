@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -169,6 +170,10 @@ const MyDocuments = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
+  const navigate = useNavigate();
+
+
   // Fetch documents from backend
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -220,7 +225,9 @@ const MyDocuments = () => {
   };
 
   const handleSummary = (documentId) => {
-    alert(`Summary for document ${documentId} coming soon!`);
+    navigate("/Summary", {
+      state: { docId: documentId }, // ✅ pass docId to Summary page
+    });
   };
 
   return (

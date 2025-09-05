@@ -99,11 +99,11 @@ export default function Navbar() {
             Home
           </Link>
           <Link
-            to="/resources"
+            to="//LegalDocDashboard"
             className="text-white"
             onClick={() => setOpen(false)}
           >
-            Resources
+            Dashboard
           </Link>
 
           {user ? (

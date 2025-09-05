@@ -12,6 +12,7 @@ import {
   Loader2,
   CheckCircle,
   AlertTriangle,
+  RefreshCw,
   ChevronRight,
   Tag
 } from "lucide-react";
@@ -74,6 +75,28 @@ const Summary = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileDocsList, setShowMobileDocsList] = useState(false);
   const [expandedSections, setExpandedSections] = useState(Array(7).fill(true));
+
+  const [isRegenerating,setisRegenerating] = useState(false);
+
+  const handleRegenerate = async () => {
+    if (!selectedDoc) return;
+    setisRegenerating(true);
+    setError(null);
+
+    try {
+      const summary = await fetchSummary(selectedDoc.id, selectedLanguage.code);
+      setSummaryData(summary);
+    } catch (e) {
+      setError(
+        e?.response?.data?.error ||
+          e?.message ||
+          "Failed to regenerate summary. Please try again."
+      );
+    } finally {
+      setisRegenerating(false);
+    }
+  };
+
 
   const toggleSection = (index) => {
     setExpandedSections((prev) =>
@@ -138,6 +161,15 @@ const fetchSummary = async (docId, languageCode) => {
   });
   return data;
 };
+
+  // const RegenerateSummary = async (docId, languageCode) => {
+  //   const { data } = await axios.post(`${SUMMARY_API_ENDPOINT}/regenerate/${docId}`, {
+  //     language: languageCode,
+  //   }, {
+  //     withCredentials: true,
+  //   });
+  //   return data;
+  // };
 
 
   const handleDocumentSelect = async (doc) => {
@@ -319,9 +351,24 @@ const fetchSummary = async (docId, languageCode) => {
                       </div>
                     )}
                   </div>
+                  {/* Regenerate Button*/ }
+                  <button
+                    className="flex items-center gap-2 px-4 py-2 shadow-lg hover:bg-gray-100 transition bg-white/20 hover:bg-white/30 rounded-lg border border-gray-200/20"
+                    onClick={handleRegenerate}
+                    disabled={isRegenerating}
+                  >
+                    {isRegenerating ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4" />
+                    )}
+                    <span className="text-sm font-medium">
+                      {isRegenerating ? "Regenerating..." : "Regenerate"}
+                    </span>
+                  </button>
+
                 </div>
               </div>
-
               {/* MAIN CONTENT */}
               <div className="flex-1 space-y-6">
                 {error ? (

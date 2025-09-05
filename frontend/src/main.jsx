@@ -16,6 +16,7 @@ import AppInitializer from "./AppInitializer";
 import LegalDocDashboard from "./components/LegalDocDashboard";
 import MyDocuments from "./components/MyDocuments";
 import Summary from "./pages/Summary";
+import ChatPage from "./pages/ChatBot";
 
 
 
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
       {
         path:"Summary",
         element:<ProtectedRoute><Summary/></ProtectedRoute>
+      },
+      {
+        path:"Chatbot",
+        element:<ProtectedRoute><ChatPage/></ProtectedRoute>
       }
       
     ],

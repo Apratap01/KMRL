@@ -17,11 +17,11 @@ export const getConvId = async (req, res) => {
     if (document.rows.length == 0) {
         return res.status(400).json({ "message": "No doc found" })
     }
-    console.log(document.rows[0].conversation_id)
-    if (document.rows[0].conversation_id != null) {
-        console.log("From beginning")
-        return res.status(200).json({ "message": "Conv Id fetched successfully", "data": document.rows[0].conversation_id })
-    }
+    // console.log(document.rows[0].conversation_id)
+    // if (document.rows[0].conversation_id != null) {
+    //     console.log("From beginning")
+    //     return res.status(200).json({ "message": "Conv Id fetched successfully", "data": document.rows[0].conversation_id })
+    // }
     const fileKey = document.rows[0].file_key
     if (!fileKey) {
         return res.status(404).json({ error: 'Document not found' });

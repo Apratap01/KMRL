@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { SUMMARY_API_ENDPOINT , DOCS_API_ENDPOINT} from "../../utils/constants.js";
+import { useSelector } from "react-redux";
 
 
 /* ========= HELPERS ========= */
@@ -60,6 +62,12 @@ const languages = [
 
 /* ========= COMPONENT ========= */
 const Summary = () => {
+
+  const {SelectedDoc} = useSelector((state) => state.auth);
+  const location = useLocation();
+  const docId = location.state?.docId || SelectedDoc;
+  console.log(SelectedDoc);
+
   const [docs, setDocs] = useState([]);
   const [docsLoading, setDocsLoading] = useState(false);
   const [docsError, setDocsError] = useState(null);
@@ -121,36 +129,46 @@ const Summary = () => {
   }, []);
 
   useEffect(() => {
-    const loadDocs = async () => {
-      setDocsLoading(true);
-      setDocsError(null);
-      try {
-        const { data } = await axios.get(`${DOCS_API_ENDPOINT}/get-all-docs`, {
+  const loadDocs = async () => {
+    console.log(SelectedDoc);
+    setDocsLoading(true);
+    setDocsError(null);
+    try {
+      const { data } = await axios.get(`${DOCS_API_ENDPOINT}/get-all-docs`, {
         withCredentials: true,
       });
 
-        const list = (data?.result || []).map((d, idx) => ({
-          id: d.id,
-          title: d.title,
-          type: mapMimeToType(d.file_type),
-          date: formatDate(d.uploaded_at),
-          avatar: (d.title?.[0] || "D").toUpperCase(),
-          gradient: pickGradient(d.id ?? idx),
-          raw: d,
-        }));
-        setDocs(list);
-      } catch (e) {
-        setDocsError(
-          e?.response?.data?.message ||
-            e?.message ||
-            "Failed to load documents. Please login again."
-        );
-      } finally {
-        setDocsLoading(false);
+      const list = (data?.result || []).map((d, idx) => ({
+        id: d.id,
+        title: d.title,
+        type: mapMimeToType(d.file_type),
+        date: formatDate(d.uploaded_at),
+        avatar: (d.title?.[0] || "D").toUpperCase(),
+        gradient: pickGradient(d.id ?? idx),
+        raw: d,
+      }));
+      setDocs(list);
+
+      // ✅ Auto-select if docId prop is passed
+      if (docId) {
+        const match = list.find((doc) => doc.id === docId);
+        if (match) {
+          handleDocumentSelect(match);
+        }
       }
-    };
-    loadDocs();
-  }, []);
+    } catch (e) {
+      setDocsError(
+        e?.response?.data?.message ||
+          e?.message ||
+          "Failed to load documents. Please login again."
+      );
+    } finally {
+      setDocsLoading(false);
+    }
+  };
+  loadDocs();
+}, [docId]); // ✅ re-run if docId changes
+
 
   /* ====== API: Get Summary ====== */
 const fetchSummary = async (docId, languageCode) => {

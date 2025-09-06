@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-function AuthCard({ title, children, googleText, footerText, footerLink, footerHref }) {
+function AuthCard({ title, children,footerText, footerLink, footerHref }) {
   return (
     <div className="bg-gradient-to-r from-[#03070e] to-[#050448] flex justify-center items-center px-6 py-12 w-full  min-h-screen">
       <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-lg max-w-md w-full text-white">
@@ -11,16 +11,7 @@ function AuthCard({ title, children, googleText, footerText, footerLink, footerH
         {children}
 
         {/* Google button */}
-        <div className="mt-6">
-          <button className="w-full flex items-center justify-center gap-3 bg-white text-black py-3 rounded-xl shadow-md hover:bg-gray-200 transition">
-            <img
-              src="https://www.svgrepo.com/show/355037/google.svg"
-              alt="Google"
-              className="w-5 h-5"
-            />
-            {googleText}
-          </button>
-        </div>
+        <div id="googleLoginBtn" className="mt-6 w-full flex justify-center"></div>
 
         {/* Footer link */}
         <p className="mt-6 text-center text-gray-300">

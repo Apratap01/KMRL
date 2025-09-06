@@ -8,6 +8,9 @@ import { USER_API_ENDPOINT } from "../../utils/constants"
 import { useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { setLoading } from "../redux/authSlice"
+import { setUser } from "../redux/authSlice"
+import { useEffect } from "react"
+
 import { Loader2, Eye, EyeOff, User, Mail, Lock, Shield } from "lucide-react"
 
 function Signup() {
@@ -76,6 +79,43 @@ function Signup() {
   }
 
   console.log(inputValue)
+
+   const handleGoogleResponse = async (response) => {
+      try {
+        dispatch(setLoading(true));
+        const res = await axios.post(
+          `${USER_API_ENDPOINT}/google`,
+          { token: response.credential },
+          { withCredentials: true }
+        );
+  
+        if (res.status === 200) {
+          toast.success("Google Login Successful");
+          dispatch(setUser(res.data.user));
+          Navigate("/");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error(error?.response?.data?.message || "Google login failed");
+      } finally {
+        dispatch(setLoading(false));
+      }
+    };
+
+    useEffect(() => {
+        /* global google */
+        if (window.google) {
+          google.accounts.id.initialize({
+            client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID, // <-- your Google Client ID in .env
+            callback: handleGoogleResponse,
+          });
+    
+          google.accounts.id.renderButton(
+            document.getElementById("googleLoginBtn"),
+            { theme: "outline", size: "large", shape: "pill" } // customize look
+          );
+        }
+      }, []);
 
   return (
     <AuthCard

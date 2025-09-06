@@ -7,6 +7,7 @@ import { USER_API_ENDPOINT } from "../../utils/constants.js";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -55,10 +56,48 @@ function Login() {
     }
   };
 
+  // Google Sign-In
+    const handleGoogleResponse = async (response) => {
+    try {
+      dispatch(setLoading(true));
+      const res = await axios.post(
+        `${USER_API_ENDPOINT}/google`,
+        { token: response.credential },
+        { withCredentials: true }
+      );
+
+      if (res.status === 200) {
+        toast.success("Google Login Successful");
+        dispatch(setUser(res.data.user));
+        navigate("/");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.response?.data?.message || "Google login failed");
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  useEffect(() => {
+    /* global google */
+    if (window.google) {
+      google.accounts.id.initialize({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID, 
+        callback: handleGoogleResponse,
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById("googleLoginBtn"),
+        { theme: "outline", size: "large", shape: "pill" } // customize look
+      );
+    }
+  }, []);
+
+
   return (
     <AuthCard
       title="Login"
-      googleText="Sign in with Google"
       footerText="Don’t have an account?"
       footerLink="Signup"
       footerHref="/signup"
@@ -111,6 +150,7 @@ function Login() {
           )}
         </button>
       </form>
+      
     </AuthCard>
   );
 }

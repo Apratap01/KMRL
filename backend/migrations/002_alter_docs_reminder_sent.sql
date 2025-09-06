@@ -1,0 +1,1 @@
+ALTER TABLE docs ADD COLUMN reminder_sent BOOLEAN DEFAULT false;

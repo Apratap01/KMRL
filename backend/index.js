@@ -7,6 +7,7 @@ import {router as chatRouter} from './routes/chat.routes.js'
 import cookieParser from 'cookie-parser'
 import cors from "cors";
 import summaryRouter from './routes/summary.routes.js'
+import './services/reminderCronService.js'
 
 
 dotenv.config()

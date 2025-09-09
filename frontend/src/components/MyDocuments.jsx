@@ -219,10 +219,13 @@ const MyDocuments = () => {
     }
   };
 
-  // Placeholder handlers
+ // Chat handler
   const handleChat = (documentId) => {
-    alert(`Chat with document ${documentId} coming soon!`);
+    navigate("/ChatBot", {
+    state: { docId: documentId }, // ✅ pass docId to ChatBot page
+  });
   };
+
 
   const handleSummary = (documentId) => {
     navigate("/Summary", {

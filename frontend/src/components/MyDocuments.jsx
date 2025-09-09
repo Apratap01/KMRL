@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  File,
   Eye,
   Calendar,
   FolderOpen,
@@ -19,6 +18,9 @@ import {
   MoreVertical,
   MessageSquare,
   FileBarChart,
+  ChevronDown,
+  Filter,
+  Trash,
 } from 'lucide-react';
 import axios from 'axios';
 import { DOCS_API_ENDPOINT } from "../../utils/constants";
@@ -68,12 +70,6 @@ const EmptyState = () => (
     <p className="text-gray-500 text-center max-w-md mb-8 text-lg">
       Start building your document library! Upload files and manage them all in one place.
     </p>
-    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-      <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-3 text-lg">
-        <Upload className="w-5 h-5 mr-3" />
-        Upload Your First Document
-      </Button>
-    </motion.div>
   </motion.div>
 );
 
@@ -88,7 +84,7 @@ const formatDate = (dateString) => {
 };
 
 // Document card
-const DocumentCard = ({ document, index, onPreview, onChat, onSummary }) => {
+const DocumentCard = ({ document, index, onPreview, onChat, onSummary, onDelete }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -104,9 +100,9 @@ const DocumentCard = ({ document, index, onPreview, onChat, onSummary }) => {
       <Card className="aspect-square bg-white shadow-lg border-0 hover:shadow-xl transition-shadow duration-300">
         <CardHeader className="pb-3 space-y-0">
           <div className="flex items-center justify-between">
-            {/* PDF Icon instead of small type icon */}
+            {/* PDF Icon */}
             <img
-              src="/pdf-icon.png" // <-- place your red PDF icon in public/ folder
+              src="/pdf-icon.png"
               alt="PDF"
               className="w-12 h-12"
             />
@@ -143,6 +139,13 @@ const DocumentCard = ({ document, index, onPreview, onChat, onSummary }) => {
                   <FileBarChart className="w-4 h-4 mr-2 text-purple-500" />
                   Summary
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => onDelete(document.id)}
+                  className="cursor-pointer hover:bg-red-100 hover:text-red-600"
+                >
+                  <Trash className="w-4 h-4 mr-2 text-red-500" />
+                  Delete
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -169,27 +172,35 @@ const MyDocuments = () => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [sortOption, setSortOption] = useState("latest"); // ✅ filter state
 
   const navigate = useNavigate();
 
+  // Sort options mapping
+  const sortOptions = {
+    latest: "Latest First",
+    oldest: "Oldest First",
+    riskier: "More Riskier First"
+  };
 
   // Fetch documents from backend
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
         setLoading(true);
-        console.log("all-doc");
         const response = await axios.get(`${DOCS_API_ENDPOINT}/get-all-docs`, {
           withCredentials: true
         });
-        console.log("response :", response);
-        if (response.status == 200) {
-          setDocuments(response.data.result || []);
+        if (response.status === 200) {
+          const docsWithRisk = (response.data.result || []).map(doc => ({
+            ...doc,
+            risk_score: doc.risk_factor ?? Math.floor(Math.random() * 100), // fallback if not provided
+          }));
+          console.log(docsWithRisk)
+          setDocuments(docsWithRisk);
         }
       } catch (err) {
         setError(err.message);
-        console.error('Error fetching documents:', err);
       } finally {
         setLoading(false);
       }
@@ -198,14 +209,31 @@ const MyDocuments = () => {
     fetchDocuments();
   }, []);
 
-  // Preview handler
+  // ✅ Sorting logic
+  const sortedDocuments = useMemo(() => {
+    switch (sortOption) {
+      case "oldest":
+        return [...documents].sort(
+          (a, b) => new Date(a.uploaded_at) - new Date(b.uploaded_at)
+        );
+      case "riskier":
+        return [...documents].sort(
+          (a,b) => a.risk_score - b.risk_score
+        )
+      case "latest":
+      default:
+        return [...documents].sort(
+          (a, b) => new Date(b.uploaded_at) - new Date(a.uploaded_at)
+        );
+    }
+  }, [documents, sortOption]);
+
+  // Handlers
   const handlePreview = async (documentId) => {
     try {
-      console.log("preview");
       const response = await axios.get(`${DOCS_API_ENDPOINT}/${documentId}/preview`, {
         withCredentials: true
       });
-      console.log("preview response : ", response);
       if (response.status !== 200) throw new Error("Failed to get preview link");
 
       if (response.data.url) {
@@ -213,24 +241,35 @@ const MyDocuments = () => {
       } else {
         alert("Preview link not found");
       }
-    } catch (err) {
-      console.error("Error previewing document:", err);
+    } catch {
       alert("Failed to preview document.");
     }
   };
 
- // Chat handler
   const handleChat = (documentId) => {
-    navigate("/ChatBot", {
-    state: { docId: documentId }, // ✅ pass docId to ChatBot page
-  });
+    navigate("/chatbot", { state: { docId: documentId } });
   };
 
-
   const handleSummary = (documentId) => {
-    navigate("/Summary", {
-      state: { docId: documentId }, // ✅ pass docId to Summary page
-    });
+    navigate("/Summary", { state: { docId: documentId } });
+  };
+
+  const handleDelete = async (documentId) => {
+    if (!window.confirm("Are you sure you want to delete this document?")) return;
+    try {
+      console.log("12")
+      const response = await axios.post(`${DOCS_API_ENDPOINT}/${documentId}/delete`,{} , {
+        withCredentials: true
+      });
+      console.log(response)
+      if (response.status === 200) {
+        setDocuments(prev => prev.filter(doc => doc.id !== documentId));
+      } else {
+        alert("Failed to delete document");
+      }
+    } catch {
+      alert("Error deleting document");
+    }
   };
 
   return (
@@ -242,7 +281,7 @@ const MyDocuments = () => {
         transition={{ duration: 0.6 }}
         className="pt-12 pb-8"
       >
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-6 flex flex-col items-center">
           <h1 className="text-5xl font-bold text-center text-gray-800 mb-4">
             My Documents
           </h1>
@@ -250,6 +289,57 @@ const MyDocuments = () => {
           <p className="text-center text-gray-600 mt-4 text-lg">
             Organize, preview, and interact with your files
           </p>
+
+          {/* ✅ Improved Sorting dropdown */}
+          <div className="mt-6">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 px-6 py-3 bg-white/80 backdrop-blur-sm border-2 border-gray-200 hover:border-blue-300 hover:bg-white text-gray-700 hover:text-blue-600 font-medium"
+                >
+                  <Filter className="w-4 h-4 text-blue-500" />
+                  <span className="min-w-[120px] text-left">{sortOptions[sortOption]}</span>
+                  <ChevronDown className="w-4 h-4 ml-2 text-gray-400" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                align="end" 
+                className="w-56 rounded-xl bg-white/95 backdrop-blur-md shadow-xl border-2 border-gray-100 p-2"
+              >
+                <DropdownMenuItem 
+                  onClick={() => setSortOption("latest")}
+                  className={`cursor-pointer rounded-lg px-3 py-2 transition-colors ${
+                    sortOption === "latest" 
+                      ? "bg-blue-100 text-blue-700 font-medium" 
+                      : "hover:bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  Latest First
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSortOption("oldest")}
+                  className={`cursor-pointer rounded-lg px-3 py-2 transition-colors ${
+                    sortOption === "oldest" 
+                      ? "bg-blue-100 text-blue-700 font-medium" 
+                      : "hover:bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  Oldest First
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setSortOption("riskier")}
+                  className={`cursor-pointer rounded-lg px-3 py-2 transition-colors ${
+                    sortOption === "riskier" 
+                      ? "bg-blue-100 text-blue-700 font-medium" 
+                      : "hover:bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  More Riskier First
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </motion.div>
 
@@ -271,10 +361,10 @@ const MyDocuments = () => {
               Array.from({ length: 8 }).map((_, index) => (
                 <DocumentCardSkeleton key={index} index={index} />
               ))
-            ) : documents.length === 0 ? (
+            ) : sortedDocuments.length === 0 ? (
               <EmptyState />
             ) : (
-              documents.map((document, index) => (
+              sortedDocuments.map((document, index) => (
                 <DocumentCard
                   key={document.id}
                   document={document}
@@ -282,6 +372,7 @@ const MyDocuments = () => {
                   onPreview={handlePreview}
                   onChat={handleChat}
                   onSummary={handleSummary}
+                  onDelete={handleDelete}
                 />
               ))
             )}

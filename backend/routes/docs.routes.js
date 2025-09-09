@@ -121,7 +121,7 @@ router.post("/upload", verifyJWT, upload.single("docs"), async (req, res) => {
 router.get('/get-all-docs', verifyJWT, async (req, res) => {
   try {
     const userId = req.user.id
-    const resultDocs = await pool.query(`SELECT id,title,file_type,uploaded_at FROM docs where user_id = $1`, [userId])
+    const resultDocs = await pool.query(`SELECT id,title,file_type,uploaded_at,risk_factor FROM docs where user_id = $1`, [userId])
     return res.status(200).json({ "result": resultDocs.rows })
   }
   catch (error) {
@@ -195,7 +195,7 @@ router.post('/:id/delete', verifyJWT, async (req, res) => {
 
     return res.status(200).json({ message: "Deleted Successfully" });
   } catch (error) {
-    console.error(error.message);
+    console.log(error.message);
     return res.status(500).json("Error deleting document on server");
   }
 });

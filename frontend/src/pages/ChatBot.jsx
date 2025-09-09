@@ -13,6 +13,14 @@ import axios from 'axios';
 import { DOCS_API_ENDPOINT , CHAT_API_ENDPOINT} from '../../utils/constants';
 import { useLocation} from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { marked } from "marked";
+
+// Convert markdown message into HTML string
+
+
+
 
 const gradients = [
   "from-indigo-500 to-purple-500",
@@ -93,7 +101,11 @@ const AILegalChatbot = () => {
   const getInitial = (name) => {
     return name.charAt(0).toUpperCase();
   };
-
+  
+  const renderMessage =  (message) => {
+  if (!message) return "";
+  return marked.parse(message); // returns HTML string
+}
   const handleDocumentSelect = async (document) => {
     setSelectedDocument(document);
     setIsDropdownOpen(false);
@@ -365,7 +377,11 @@ const AILegalChatbot = () => {
                         ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-tr-sm'
                         : 'bg-gray-100 text-gray-800 rounded-tl-sm'
                     }`}>
-                      <p className="text-sm leading-relaxed">{message.content}</p>
+                      <div
+                          className="text-sm leading-relaxed prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: renderMessage(message.content) }}
+                        />
+
                       <p className={`text-xs mt-2 ${
                         message.type === 'user' ? 'text-purple-100' : 'text-gray-500'
                       }`}>

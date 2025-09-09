@@ -92,7 +92,7 @@ const Summary = () => {
     setError(null);
 
     try {
-      const summary = await fetchSummary(selectedDoc.id, selectedLanguage.code);
+      const summary = await RegenerateSummary(selectedDoc.id, selectedLanguage.code);
       setSummaryData(summary);
     } catch (e) {
       setError(
@@ -180,14 +180,14 @@ const fetchSummary = async (docId, languageCode) => {
   return data;
 };
 
-  // const RegenerateSummary = async (docId, languageCode) => {
-  //   const { data } = await axios.post(`${SUMMARY_API_ENDPOINT}/regenerate/${docId}`, {
-  //     language: languageCode,
-  //   }, {
-  //     withCredentials: true,
-  //   });
-  //   return data;
-  // };
+  const RegenerateSummary = async (docId, languageCode) => {
+    const { data } = await axios.post(`${SUMMARY_API_ENDPOINT}/regenerate/${docId}`, {
+      language: languageCode,
+    }, {
+      withCredentials: true,
+    });
+    return data;
+  };
 
 
   const handleDocumentSelect = async (doc) => {

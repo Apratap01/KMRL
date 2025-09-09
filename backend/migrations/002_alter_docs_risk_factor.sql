@@ -1,0 +1,1 @@
+ALTER TABLE docs ADD COLUMN risk_factor INTEGER DEFAULT 0;

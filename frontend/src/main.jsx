@@ -17,6 +17,7 @@ import LegalDocDashboard from "./components/LegalDocDashboard";
 import MyDocuments from "./components/MyDocuments";
 import Summary from "./pages/Summary";
 import ChatPage from "./pages/ChatBot";
+import AILegalChatbot from "./pages/ChatBot";
 
 
 
@@ -56,7 +57,7 @@ const router = createBrowserRouter([
       },
       {
         path:"Chatbot",
-        element:<ProtectedRoute><ChatPage/></ProtectedRoute>
+        element:<ProtectedRoute><AILegalChatbot/></ProtectedRoute>
       }
       
     ],

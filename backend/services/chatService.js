@@ -4,7 +4,7 @@ import FormData from 'form-data';
 import fs from 'fs';
 
 // The URL of your FastAPI server
-const FASTAPI_URL = 'http://localhost:8000';
+const FASTAPI_URL = process.env.FASTAPI_URL ||'http://localhost:8000';
 
 export async function getResponseFromFastApi(conversation_id, query) {
   try {

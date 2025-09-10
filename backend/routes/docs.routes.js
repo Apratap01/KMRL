@@ -29,7 +29,7 @@ export const s3 = new S3Client({
 });
 
 
-const FASTAPI_URL = 'http://localhost:8000'; // Define FastAPI URL
+const FASTAPI_URL = process.env.FASTAPI_URL ||'http://localhost:8000'; // Define FastAPI URL
 
 async function downloadFileFromSignedUrl(signedUrl, destPath) {
   const writer = fs.createWriteStream(destPath);

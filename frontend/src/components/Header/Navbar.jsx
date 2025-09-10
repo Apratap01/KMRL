@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi"; // npm install react-icons
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { USER_API_ENDPOINT } from "../../../utils/constants";
 import { setUser } from "../../redux/authSlice";
 import { toast } from "sonner";
 
@@ -17,7 +16,7 @@ export default function Navbar() {
   const logOutHandler = async () => {
     try {
       const res = await axios.post(
-        `${USER_API_ENDPOINT}/logout`,
+        `${import.meta.env.VITE_USER_API_ENDPOINT}/logout`,
         {},
         {
           withCredentials: true,

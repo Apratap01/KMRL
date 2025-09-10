@@ -3,7 +3,6 @@ import AuthCard from "../components/AuthCard.jsx";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading, setUser } from "../redux/authSlice.js";
-import { USER_API_ENDPOINT } from "../../utils/constants.js";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -28,7 +27,7 @@ function Login() {
     e.preventDefault();
     try {
       dispatch(setLoading(true));
-      const res = await axios.post(`${USER_API_ENDPOINT}/login`, form,{
+      const res = await axios.post(`${import.meta.env.VITE_USER_API_ENDPOINT}/login`, form,{
         withCredentials:true,
       }
       );
@@ -61,13 +60,13 @@ function Login() {
     try {
       dispatch(setLoading(true));
       const res = await axios.post(
-        `${USER_API_ENDPOINT}/google`,
+        `${import.meta.env.VITE_USER_API_ENDPOINT}/google`,
         { token: response.credential },
         { withCredentials: true }
       );
 
       if (res.status === 200) {
-        toast.success("Google Login Successful");
+        toast.success("Google Login Successfull");
         dispatch(setUser(res.data.user));
         navigate("/");
       }
@@ -80,19 +79,47 @@ function Login() {
   };
 
   useEffect(() => {
-    /* global google */
-    if (window.google) {
-      google.accounts.id.initialize({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID, 
-        callback: handleGoogleResponse,
-      });
+  /* global google */
+  const mount = () => {
+    const container = document.getElementById("googleLoginBtn");
+    if (!container) return;
 
-      google.accounts.id.renderButton(
-        document.getElementById("googleLoginBtn"),
-        { theme: "outline", size: "large", shape: "pill" } // customize look
-      );
-    }
-  }, []);
+    // Avoid duplicates if React StrictMode calls effects twice
+    container.innerHTML = "";
+
+    google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      callback: handleGoogleResponse,
+    });
+
+    // Render an official white Google button (outline = white)
+    google.accounts.id.renderButton(container, {
+      theme: "outline",      // white button
+      size: "large",
+      shape: "pill",
+      text: "signin_with",
+      logo_alignment: "left",
+      width: "100%",         // full width like your Login button
+    });
+
+    // Optional: don’t auto-show One Tap
+    // google.accounts.id.prompt(() => {}); // keep disabled to only use the button
+  };
+
+  if (window.google) {
+    mount();
+  } else {
+    // If the GIS script hasn’t loaded yet, poll briefly
+    const id = setInterval(() => {
+      if (window.google) {
+        clearInterval(id);
+        mount();
+      }
+    }, 100);
+    return () => clearInterval(id);
+  }
+}, []);
+
 
 
   return (
@@ -113,27 +140,41 @@ function Login() {
         />
 
         <div className="relative">
-          <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-            name="password"
-            value={form.password}
-            onChange={changeEventHandler}
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <div className="flex items-center mt-2">
-            <input
-              type="checkbox"
-              id="showPassword"
-              checked={showPassword}
-              onChange={() => setShowPassword(!showPassword)}
-              className="mr-2"
-            />
-            <label htmlFor="showPassword" className="text-gray-300 text-sm">
-              Show Password
-            </label>
-          </div>
-        </div>
+  <input
+    type={showPassword ? "text" : "password"}
+    placeholder="Password"
+    name="password"
+    value={form.password}
+    onChange={changeEventHandler}
+    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+
+  <div className="flex items-center justify-between mt-2">
+    {/* Show password toggle */}
+    <div className="flex items-center">
+      <input
+        type="checkbox"
+        id="showPassword"
+        checked={showPassword}
+        onChange={() => setShowPassword(!showPassword)}
+        className="mr-2"
+      />
+      <label htmlFor="showPassword" className="text-gray-300 text-sm">
+        Show Password
+      </label>
+    </div>
+
+    {/* Forgot Password link */}
+    <button
+      type="button"
+      onClick={() => navigate("/forgot-password")}
+      className="text-sm text-blue-400 hover:underline"
+    >
+      Forgot Password?
+    </button>
+  </div>
+</div>
+
 
         <button
           type="submit"

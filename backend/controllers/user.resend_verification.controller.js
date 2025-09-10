@@ -39,7 +39,7 @@ export const resendVerification = async (req, res) => {
       [user.id, token, expiresAt]
     );
 
-    const verifyUrl = `http://localhost:1818/api/user/verify-email?token=${token}`;
+    const verifyUrl = `${process.env.BACKEND_URL}/api/user/verify-email?token=${token}`;
 
     // send email
     let info = await transporter.sendMail({

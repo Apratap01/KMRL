@@ -26,7 +26,7 @@ export async function forgotPassword(req, res) {
       `UPDATE users 
        SET reset_password_token = $1, reset_password_expires = $2
        WHERE email = $3`,
-      [hashedToken, new Date(Date.now() + 15 * 60 * 1000), email] // 15 min expiry
+      [resetToken, new Date(Date.now() + 15 * 60 * 1000), email] // 15 min expiry
     );
 
     // send reset link
@@ -38,7 +38,7 @@ export async function forgotPassword(req, res) {
       html: `<p>Click <a href="${resetUrl}">here</a> to change your password.</p>`,
     });
     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-    res.json({ message: "Password reset link sent to email" });
+    res.json({ message: "Password reset link sent to email"  , resetToken: resetToken });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: "Server error" });

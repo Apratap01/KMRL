@@ -39,7 +39,7 @@ export const registerUser = async (req, res) => {
             [newUser.rows[0].id, verificationToken, expiresAt]
         );
 
-        const verificationLink = `http://localhost:1818/api/user/verify-email?token=${verificationToken}`;
+        const verificationLink = `${process.env.BACKEND_URL}/api/user/verify-email?token=${verificationToken}`;
         console.log("Verify your email:", verificationLink);
 
         // Create transporter inside function for better error handling

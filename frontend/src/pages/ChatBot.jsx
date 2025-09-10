@@ -13,8 +13,6 @@ import axios from 'axios';
 import { DOCS_API_ENDPOINT , CHAT_API_ENDPOINT} from '../../utils/constants';
 import { useLocation} from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { marked } from "marked";
 
 // Convert markdown message into HTML string

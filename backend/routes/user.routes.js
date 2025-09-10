@@ -9,6 +9,8 @@ import { refreshToken } from '../controllers/user.refresh.controller.js'
 import { resendVerification } from '../controllers/user.resend_verification.controller.js'
 import { fetchUserData } from '../controllers/user.controller.js'
 import { handleGoogleSignIn } from '../controllers/user.google.controller.js'
+import { forgotPassword } from '../controllers/user.forgot.js'
+import { changePassword } from '../controllers/user.change_password.js'
 
 
 dotenv.config()
@@ -23,6 +25,8 @@ router.post('/refresh',refreshToken)
 router.post("/resend-verification", resendVerification);
 router.get('/fetch-user-data',verifyJWT,fetchUserData)
 router.post('/google',handleGoogleSignIn)
+router.post('/forgot-password',forgotPassword)
+router.post('/change-password/:token',changePassword)
 
 export default router;
 

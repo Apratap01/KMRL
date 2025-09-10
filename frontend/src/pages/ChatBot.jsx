@@ -10,7 +10,6 @@ import {
   Bot
 } from 'lucide-react';
 import axios from 'axios';
-import { DOCS_API_ENDPOINT , CHAT_API_ENDPOINT} from '../../utils/constants';
 import { useLocation} from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { marked } from "marked";
@@ -67,7 +66,7 @@ const AILegalChatbot = () => {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const { data } = await axios.get(`${DOCS_API_ENDPOINT}/get-all-docs`, {
+        const { data } = await axios.get(`${import.meta.env.VITE_DOCS_API_ENDPOINT}/get-all-docs`, {
           withCredentials: true,
         });
 
@@ -111,7 +110,7 @@ const AILegalChatbot = () => {
     setIsDocLoading(true);
 
     try {
-        const res = await axios.post(`${CHAT_API_ENDPOINT}/chunk/${document.id}`);
+        const res = await axios.post(`${import.meta.env.VITE_CHAT_API_ENDPOINT}/chunk/${document.id}`);
         console.log("Chunk API response:", res.data);
         setChunkId(res.data.data); // conversationId
       } catch (error) {
@@ -138,7 +137,7 @@ const AILegalChatbot = () => {
 
     try {
       const res = await axios.post(
-        `${CHAT_API_ENDPOINT}/${chunkId}/${selectedDocument.id}`,
+        `${import.meta.env.VITE_CHAT_API_ENDPOINT}/${chunkId}/${selectedDocument.id}`,
         { query: inputValue },
         { headers: { "Content-Type": "application/json" } }
       );

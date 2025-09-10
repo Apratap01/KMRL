@@ -17,8 +17,6 @@ import {
   ChevronRight,
   Tag
 } from "lucide-react";
-
-import { SUMMARY_API_ENDPOINT , DOCS_API_ENDPOINT} from "../../utils/constants.js";
 import { useSelector } from "react-redux";
 
 
@@ -134,7 +132,7 @@ const Summary = () => {
     setDocsLoading(true);
     setDocsError(null);
     try {
-      const { data } = await axios.get(`${DOCS_API_ENDPOINT}/get-all-docs`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_DOCS_API_ENDPOINT}/get-all-docs`, {
         withCredentials: true,
       });
 
@@ -172,7 +170,7 @@ const Summary = () => {
 
   /* ====== API: Get Summary ====== */
 const fetchSummary = async (docId, languageCode) => {
-  const { data } = await axios.post(`${SUMMARY_API_ENDPOINT}/${docId}`, {
+  const { data } = await axios.post(`${import.meta.env.VITE_SUMMARY_API_ENDPOINT}/${docId}`, {
     language: languageCode,
   }, {
     withCredentials: true,
@@ -181,7 +179,7 @@ const fetchSummary = async (docId, languageCode) => {
 };
 
   const RegenerateSummary = async (docId, languageCode) => {
-    const { data } = await axios.post(`${SUMMARY_API_ENDPOINT}/regenerate/${docId}`, {
+    const { data } = await axios.post(`${import.meta.env.VITE_SUMMARY_API_ENDPOINT}/regenerate/${docId}`, {
       language: languageCode,
     }, {
       withCredentials: true,

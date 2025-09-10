@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../redux/authSlice";
 import { toast } from "sonner";
 import axios from "axios";
-import { USER_API_ENDPOINT } from "../../utils/constants";
 
 function VerifyEmail() {
   const [email, setEmail] = useState("");
@@ -22,7 +21,7 @@ function VerifyEmail() {
       dispatch(setLoading(true));
 
       const res = await axios.post(
-        `${USER_API_ENDPOINT}/resend-verification`,
+        `${import.meta.env.VITE_USER_API_ENDPOINT}/resend-verification`,
         { email },
         { withCredentials: true }
       );

@@ -1,10 +1,7 @@
-"use client"
-
 import { useState } from "react"
 import AuthCard from "../components/AuthCard"
 import { toast } from "sonner"
 import axios from "axios"
-import { USER_API_ENDPOINT } from "../../utils/constants"
 import { useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { setLoading } from "../redux/authSlice"
@@ -33,7 +30,7 @@ function Signup() {
     e.preventDefault()
     try {
       dispatch(setLoading(true))
-      const res = await axios(`${USER_API_ENDPOINT}/register`, {
+      const res = await axios(`${import.meta.env.VITE_USER_API_ENDPOINT}/register`, {
         method: "POST",
         data: inputValue,
       })
@@ -84,7 +81,7 @@ function Signup() {
       try {
         dispatch(setLoading(true));
         const res = await axios.post(
-          `${USER_API_ENDPOINT}/google`,
+          `${import.meta.env.VITE_USER_API_ENDPOINT}/google`,
           { token: response.credential },
           { withCredentials: true }
         );

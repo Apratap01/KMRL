@@ -40,7 +40,7 @@ export const loginUser = async (req, res) => {
 
         const options = {
             httpOnly: true,
-            secure: true, // only https in prod
+            secure: true, 
             sameSite: "none"
         };
 

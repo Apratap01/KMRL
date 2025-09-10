@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-function AuthCard({ title, children,footerText, footerLink, footerHref }) {
+function AuthCard({ title, children, footerText, footerLink, footerHref }) {
   return (
     <div className="bg-gradient-to-r from-[#03070e] to-[#050448] flex justify-center items-center px-6 py-12 w-full  min-h-screen">
       <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl shadow-lg max-w-md w-full text-white">
@@ -10,8 +10,11 @@ function AuthCard({ title, children,footerText, footerLink, footerHref }) {
         {/* Form content injected from Login/Signup */}
         {children}
 
-        {/* Google button */}
-        <div id="googleLoginBtn" className="mt-6 w-full flex justify-center"></div>
+
+        {/* Google button renders here */}
+        <div id="googleLoginBtn" className="mt-6 w-full"></div>
+
+
 
         {/* Footer link */}
         <p className="mt-6 text-center text-gray-300">

@@ -1,9 +1,8 @@
 import axios from "axios";
-import {USER_API_ENDPOINT} from "./constants.js"
 
 export const getUser = async () => {
   try {
-    const res = await axios.get(`${USER_API_ENDPOINT}/fetch-user-data`, {
+    const res = await axios.get(`${import.meta.env.VITE_USER_API_ENDPOINT}/fetch-user-data`, {
       withCredentials: true, 
     });
     console.log(res);

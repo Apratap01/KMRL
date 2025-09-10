@@ -23,7 +23,6 @@ import {
   Trash,
 } from 'lucide-react';
 import axios from 'axios';
-import { DOCS_API_ENDPOINT } from "../../utils/constants";
 
 // Loading skeleton
 const DocumentCardSkeleton = ({ index }) => (
@@ -188,7 +187,7 @@ const MyDocuments = () => {
     const fetchDocuments = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${DOCS_API_ENDPOINT}/get-all-docs`, {
+        const response = await axios.get(`${import.meta.env.VITE_DOCS_API_ENDPOINT}/get-all-docs`, {
           withCredentials: true
         });
         if (response.status === 200) {
@@ -231,7 +230,7 @@ const MyDocuments = () => {
   // Handlers
   const handlePreview = async (documentId) => {
     try {
-      const response = await axios.get(`${DOCS_API_ENDPOINT}/${documentId}/preview`, {
+      const response = await axios.get(`${import.meta.env.VITE_DOCS_API_ENDPOINT}/${documentId}/preview`, {
         withCredentials: true
       });
       if (response.status !== 200) throw new Error("Failed to get preview link");
@@ -258,7 +257,7 @@ const MyDocuments = () => {
     if (!window.confirm("Are you sure you want to delete this document?")) return;
     try {
       console.log("12")
-      const response = await axios.post(`${DOCS_API_ENDPOINT}/${documentId}/delete`,{} , {
+      const response = await axios.post(`${import.meta.env.VITE_DOCS_API_ENDPOINT}/${documentId}/delete`,{} , {
         withCredentials: true
       });
       console.log(response)

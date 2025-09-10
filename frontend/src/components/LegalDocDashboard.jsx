@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import {  useDispatch , useSelector } from 'react-redux'; 
 import { toast } from "sonner";
-import { DOCS_API_ENDPOINT } from "../../utils/constants.js";
 import {setRecentDoc} from "../redux/authSlice.js"
 
 const LegalDocDashboard = () => {
@@ -53,7 +52,7 @@ const LegalDocDashboard = () => {
       setMessage("");
 
       const res = await axios.post(
-        `${DOCS_API_ENDPOINT}/upload`,
+        `${import.meta.env.VITE_DOCS_API_ENDPOINT}/upload`,
         formData,
         {
           withCredentials: true,

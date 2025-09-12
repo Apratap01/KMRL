@@ -5,8 +5,16 @@ export const userLogout = async (req, res) => {
 
         await pool.query("DELETE FROM refresh_tokens WHERE user_id = $1", [id]);
 
-        res.clearCookie('accessToken');
-        res.clearCookie('refreshToken');
+        const isProduction = process.env.NODE_ENV
+
+        const options = {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+        };
+
+        res.clearCookie("accessToken", options);
+        res.clearCookie("refreshToken", options);
 
         return res.status(200).json({ message: "User logged out successfully" });
     } catch (err) {

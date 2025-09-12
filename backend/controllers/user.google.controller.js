@@ -21,10 +21,10 @@ export const handleGoogleSignIn = async (req, res) => {
                  RETURNING *`,
                 [name, email, null, "google", true]
             );
-            user = insert.rows[0]; 
-        } 
+            user = insert.rows[0];
+        }
         else {
-            user = result.rows[0]; 
+            user = result.rows[0];
         }
 
         const accessToken = generateAccessToken(user);
@@ -34,10 +34,12 @@ export const handleGoogleSignIn = async (req, res) => {
         await pool.query("DELETE FROM refresh_tokens WHERE user_id = $1", [user.id]);
         await pool.query("INSERT INTO refresh_tokens (user_id, token) VALUES ($1, $2)", [user.id, refreshToken]);
 
+        const isProduction = process.env.NODE_ENV === "production";
+
         const options = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict"
+            secure: isProduction,         
+            sameSite: isProduction ? "none" : "lax",
         };
 
         return res

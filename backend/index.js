@@ -47,6 +47,8 @@ app.use('/api/docs',docsRouter)
 app.use('/api/summary',summaryRouter)
 app.use('/api/chat',chatRouter)
 
+console.log(`Environment-${process.env.NODE_ENV}`)
+
 
 app.listen(PORT,()=>{
     console.log(`App is running on the port - ${PORT}`);

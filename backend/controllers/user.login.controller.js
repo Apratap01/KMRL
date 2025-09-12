@@ -38,10 +38,12 @@ export const loginUser = async (req, res) => {
 
         await pool.query("INSERT INTO refresh_tokens (user_id, token) VALUES ($1, $2)", [existingUser.rows[0].id, refreshToken]);
 
+        const isProduction = process.env.NODE_ENV === "production";
+
         const options = {
             httpOnly: true,
-            secure: true, 
-            sameSite: "none"
+            secure: isProduction,        
+            sameSite: isProduction ? "none" : "lax",
         };
 
 

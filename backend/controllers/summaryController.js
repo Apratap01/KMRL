@@ -165,7 +165,7 @@ export async function regenerateSummary(req, res) {
       [risk_factor,docId]
     );
 
-    res.status(200).json(finalResult.rows[0]);
+    res.status(200).json(finalResult.rows[0].summary);
   } catch (error) {
     console.error('Summary API error:', error.message);
     res.status(500).json({ error: 'Failed to process document summary.' });

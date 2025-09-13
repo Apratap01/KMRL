@@ -84,7 +84,7 @@ export async function summarizeDocument(req, res) {
       [risk_factor]
     );
 
-    res.status(200).json(finalRes.rows[0].summary);
+    res.status(200).json(finalRes.rows[0].summary.summary);
   } catch (error) {
     console.error('Summary API error:', error.message);
     res.status(500).json({ error: 'Failed to process document summary.' });
@@ -147,10 +147,10 @@ export async function regenerateSummary(req, res) {
 
     const finalRes = await pool.query(resQuery,[summaryData.summary,docId,language])
 
-    const finalResult = await pool.query(`SELECT summary from summaries WHERE doc_id =$1 AND language =$2`,[docId,language])
+    // const finalResult = await pool.query(`SELECT summary from summaries WHERE doc_id =$1 AND language =$2`,[docId,language])
 
     // console.log(summaryData)
-    console.log(finalResult.rows)
+    console.log(finalRes.rows)
     const risk_factor = summaryData.summary.urgency_percentage
     console.log(risk_factor)
 
@@ -165,7 +165,7 @@ export async function regenerateSummary(req, res) {
       [risk_factor,docId]
     );
 
-    res.status(200).json(finalResult.rows[0].summary);
+    res.status(200).json(finalRes.rows[0].summary.summary);
   } catch (error) {
     console.error('Summary API error:', error.message);
     res.status(500).json({ error: 'Failed to process document summary.' });

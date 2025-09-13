@@ -82,6 +82,7 @@ router.post("/upload", verifyJWT, upload.single("docs"), async (req, res) => {
         },
       });
       lastDate = dateResponse.data.last_date;
+      console.log(FASTAPI_URL)
       console.log(`Extracted last date: ${lastDate}`);
     } catch (llmError) {
       console.error("Error extracting date from document:", llmError.message);

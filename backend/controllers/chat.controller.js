@@ -14,6 +14,7 @@ export const realtimeChat = async(req,res)=>{
         if(!docId){
             return res.status(400).json({"message":"No doc id given"})
         }
+        console.log(chunkId)
         const queryResult = await getResponseFromFastApi(chunkId,query)
         console.log(queryResult)
         return res.status(200).json({"message":"Sent successfully","queryResult":queryResult.answer})

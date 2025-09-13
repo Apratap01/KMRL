@@ -67,11 +67,11 @@ export async function summarizeDocument(req, res) {
     const resQuery = `
       INSERT INTO summaries (doc_id, language, summary) 
       VALUES ($1, $2, $3) RETURNING *`;
-    const values = [docId, language, summaryData.summary];
+    const values = [docId, language, summaryData];
     const finalRes = await pool.query(resQuery, values);
 
     // Step 4: Update docs table with is_summarised = true
-    const risk_factor = summaryData.summary.urgency_percentage
+    const risk_factor = summaryData.urgency_percentage
     console.log(risk_factor)
     
     await pool.query(
@@ -147,6 +147,10 @@ export async function regenerateSummary(req, res) {
 
     const finalRes = await pool.query(resQuery,[summaryData.summary,docId,language])
 
+    const finalResult = await pool.query(`SELECT summary from summaries WHERE doc_id =$1 AND language =$2`,[docId,language])
+
+    // console.log(summaryData)
+    console.log(finalResult.rows)
     const risk_factor = summaryData.summary.urgency_percentage
     console.log(risk_factor)
 
@@ -161,7 +165,7 @@ export async function regenerateSummary(req, res) {
       [risk_factor,docId]
     );
 
-    res.status(200).json(finalRes.rows[0].summary);
+    res.status(200).json(finalResult.rows[0]);
   } catch (error) {
     console.error('Summary API error:', error.message);
     res.status(500).json({ error: 'Failed to process document summary.' });

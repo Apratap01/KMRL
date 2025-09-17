@@ -1,47 +1,22 @@
 import { pool } from "../config/db.js";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
-import nodemailer from 'nodemailer';
-import sgMail from '@sendgrid/mail'; // Add SendGrid as backup
+import sgMail from '@sendgrid/mail';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Multiple transporter options for better reliability
-const createGmailTransporter = () => {
-    return nodemailer.createTransport({
-        service: 'gmail', // Use service instead of manual host
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS, // Make sure this is App Password, not regular password
-        },
-        // Remove custom port and secure settings when using 'service'
-    });
-};
-
-// Alternative: SMTP2GO or other cloud-friendly services
-const createSMTP2GOTransporter = () => {
-    return nodemailer.createTransport({
-        host: 'mail.smtp2go.com',
-        port: 587,
-        secure: false,
-        auth: {
-            user: process.env.SMTP2GO_USER,
-            pass: process.env.SMTP2GO_PASS,
-        },
-    });
-};
-
-// SendGrid setup as fallback
-if (process.env.SENDGRID_API_KEY) {
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+// SendGrid setup
+if (!process.env.SENDGRID_API_KEY) {
+    throw new Error("SendGrid API key is missing in environment variables!");
 }
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// Function to send email with fallback options
+// Function to send email via SendGrid only
 const sendVerificationEmail = async (to, name, verificationLink) => {
     const emailData = {
-        from: `"LegalDocs" <${process.env.EMAIL_USER}>`,
-        to: to,
+        from: `"LegalDocs" <${process.env.FROM_EMAIL || process.env.SENDGRID_VERIFIED_EMAIL}>`,
+        to,
         subject: "Verify your email",
         text: `Hello ${name}! Click here to verify your email: ${verificationLink}`,
         html: `
@@ -62,57 +37,25 @@ const sendVerificationEmail = async (to, name, verificationLink) => {
         `,
     };
 
-    // Try Gmail first
     try {
-        const gmailTransporter = createGmailTransporter();
-        const info = await gmailTransporter.sendMail(emailData);
-        console.log("✅ Email sent via Gmail:", info.messageId);
-        return { success: true, provider: 'Gmail', messageId: info.messageId };
-    } catch (gmailError) {
-        console.log("❌ Gmail failed:", gmailError.message);
-        
-        // Try SendGrid as fallback
-        if (process.env.SENDGRID_API_KEY) {
-            try {
-                const sendGridData = {
-                    to: emailData.to,
-                    from: emailData.from,
-                    subject: emailData.subject,
-                    text: emailData.text,
-                    html: emailData.html,
-                };
-                
-                const info = await sgMail.send(sendGridData);
-                console.log("✅ Email sent via SendGrid");
-                return { success: true, provider: 'SendGrid', messageId: info[0].headers['x-message-id'] };
-            } catch (sendGridError) {
-                console.log("❌ SendGrid failed:", sendGridError.message);
-                
-                // Try SMTP2GO or other service as final fallback
-                if (process.env.SMTP2GO_USER && process.env.SMTP2GO_PASS) {
-                    try {
-                        const smtp2goTransporter = createSMTP2GOTransporter();
-                        const info = await smtp2goTransporter.sendMail(emailData);
-                        console.log("✅ Email sent via SMTP2GO:", info.messageId);
-                        return { success: true, provider: 'SMTP2GO', messageId: info.messageId };
-                    } catch (smtp2goError) {
-                        console.log("❌ SMTP2GO failed:", smtp2goError.message);
-                    }
-                }
-            }
+        const info = await sgMail.send(emailData);
+        console.log("✅ Email sent via SendGrid");
+        return { success: true, provider: 'SendGrid' };
+    } catch (sendGridError) {
+        console.error("❌ SendGrid failed:", sendGridError.message);
+        if (sendGridError.response) {
+            console.error("SendGrid error details:", sendGridError.response.body);
         }
-        
-        // If all methods fail, throw error
-        throw new Error(`All email services failed. Last error: ${gmailError.message}`);
+        throw new Error("SendGrid email failed");
     }
 };
 
 export const registerUser = async (req, res) => {
     try {
         const { email, password, name } = req.body;
-        
+
         if (!email || !password || !name) {
-            return res.status(400).json({ "message": "Check your details" });
+            return res.status(400).json({ message: "Check your details" });
         }
 
         const existingUser = await pool.query(
@@ -121,7 +64,7 @@ export const registerUser = async (req, res) => {
         );
 
         if (existingUser.rows.length > 0) {
-            return res.status(400).json({ "message": "User already exists" });
+            return res.status(400).json({ message: "User already exists" });
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -143,28 +86,11 @@ export const registerUser = async (req, res) => {
         const verificationLink = `${process.env.BACKEND_URL}/api/user/verify-email?token=${verificationToken}`;
         console.log("Verification link:", verificationLink);
 
-        // Send email with fallback options
-        try {
-            const emailResult = await sendVerificationEmail(
-                newUser.rows[0].email,
-                name,
-                verificationLink
-            );
-            
-            console.log(`✅ Email sent successfully via ${emailResult.provider} to:`, newUser.rows[0].email);
-            
-            res.status(201).json({
-                message: "User registered successfully. Please check your email to verify.",
-            });
-        } catch (emailError) {
-            console.error('❌ All email services failed:', emailError.message);
-            
-            // Still register the user but warn about email
-            res.status(201).json({
-                message: "User registered successfully, but email verification failed. Please contact support.",
-                warning: "Email service temporarily unavailable"
-            });
-        }
+        await sendVerificationEmail(newUser.rows[0].email, name, verificationLink);
+
+        res.status(201).json({
+            message: "User registered successfully. Please check your email to verify.",
+        });
 
     } catch (error) {
         console.error('Registration error:', error);

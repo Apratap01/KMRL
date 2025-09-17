@@ -1,11 +1,13 @@
 import cron from 'node-cron'
 import { pool } from '../config/db.js'
-import { createTransporter } from './createTransporter.js'
 import dotenv from 'dotenv'
-import nodemailer from "nodemailer"
+import sgMail from '@sendgrid/mail'
 
 dotenv.config()
-
+if (!process.env.SENDGRID_API_KEY) {
+    throw new Error("SendGrid API key missing in environment variables!");
+}
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 cron.schedule("0 9 * * *", async () => {
     console.log("Running daily reminder cron job...");
@@ -37,26 +39,29 @@ WHERE d.last_date = CURRENT_DATE + INTERVAL '1 day'
             return;
         }
 
-        const transporter = await createTransporter();
-
         for (const doc of rows) {
-            const mailOptions = {
-                from: `"LegalDocs" <${process.env.EMAIL_USER}>`,
+            const msg = {
                 to: doc.email,
+                from: `"LegalDocs" <${process.env.FROM_EMAIL}>`, // Verified sender in SendGrid
                 subject: "📌 Reminder: Document deadline is tomorrow",
                 text: `Hello! Your document "${doc.title}" is due on ${doc.last_date}. Please take necessary action.`,
+                html: `
+                    <p>Hello!</p>
+                    <p>Your document "<strong>${doc.title}</strong>" is due on <strong>${doc.last_date}</strong>. Please take necessary action.</p>
+                `,
             };
 
-            const info = await transporter.sendMail(mailOptions);
 
-            // Preview URL (only works for Ethereal)
-            const previewUrl = nodemailer.getTestMessageUrl(info);
-            console.log(`Reminder sent to ${doc.email}: ${info.messageId}`);
-            if (previewUrl) {
-                console.log(`Preview email here: ${previewUrl}`);
+            try {
+                const response = await sgMail.send(msg);
+                console.log(`✅ Reminder sent to ${doc.email}`);
+            } catch (sendGridError) {
+                console.error(`❌ Failed to send reminder to ${doc.email}:`, sendGridError.message);
+                if (sendGridError.response) {
+                    console.error(sendGridError.response.body);
+                }
             }
 
-            // Update reminder_sent
             await client.query(
                 "UPDATE docs SET reminder_sent = true WHERE id = $1",
                 [doc.id]

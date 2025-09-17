@@ -1,18 +1,23 @@
 import { pool } from "../config/db.js";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
-import { createTransporter } from "../services/createTransporter.js"; 
+import { createTransporter } from "../services/createTransporter.js";
 import nodemailer from 'nodemailer'
 import dotenv from 'dotenv'
 
 dotenv.config()
 const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
+    host: 'smtp.gmail.com',
+    auth: {
         user: process.env.EMAIL_USER, // your Gmail address
         pass: process.env.EMAIL_PASS, // your App Password
-      },
-    });
+    },
+    port: 465,
+    secure: true,
+    tls: {
+        rejectUnauthorized: false,
+    },
+});
 export const registerUser = async (req, res) => {
     try {
         const { email, password, name } = req.body
@@ -75,7 +80,7 @@ export const registerUser = async (req, res) => {
         });
 
         console.log("✅ Email sent successfully to:", newUser.rows[0].email);
-        
+
         // Only show preview URL if using Ethereal (for development)
         // const previewUrl = nodemailer.getTestMessageUrl(info);
         // if (previewUrl) {

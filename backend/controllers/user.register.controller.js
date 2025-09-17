@@ -6,7 +6,13 @@ import nodemailer from 'nodemailer'
 import dotenv from 'dotenv'
 
 dotenv.config()
-
+const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER, // your Gmail address
+        pass: process.env.EMAIL_PASS, // your App Password
+      },
+    });
 export const registerUser = async (req, res) => {
     try {
         const { email, password, name } = req.body
@@ -43,7 +49,7 @@ export const registerUser = async (req, res) => {
         console.log("Verify your email:", verificationLink);
 
         // Create transporter inside function for better error handling
-        const transporter = await createTransporter();
+        // const transporter = await createTransporter();
 
         let info = await transporter.sendMail({
             from: `"LegalDocs" <${process.env.EMAIL_USER}>`,
@@ -71,14 +77,13 @@ export const registerUser = async (req, res) => {
         console.log("✅ Email sent successfully to:", newUser.rows[0].email);
         
         // Only show preview URL if using Ethereal (for development)
-        const previewUrl = nodemailer.getTestMessageUrl(info);
-        if (previewUrl) {
-            console.log("Preview URL: %s", previewUrl);
-        }
+        // const previewUrl = nodemailer.getTestMessageUrl(info);
+        // if (previewUrl) {
+        //     console.log("Preview URL: %s", previewUrl);
+        // }
 
         res.status(201).json({
             message: "User registered successfully. Please check your email to verify.",
-            ...(previewUrl && { previewUrl }) // Only include previewUrl if it exists
         });
 
     } catch (error) {

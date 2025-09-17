@@ -55,7 +55,8 @@ router.post("/upload", verifyJWT, upload.single("docs"), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-
+    console.log("file:",req.file)
+    console.log("body:",req.body)
     const fileKey = `${Date.now()}_${req.file.originalname}`;
 
     const params = {

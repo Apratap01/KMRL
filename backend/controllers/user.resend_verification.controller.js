@@ -43,7 +43,7 @@ export const resendVerification = async (req, res) => {
 
     // send email
     let info = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: `"LegalDocs" <${process.env.EMAIL_USER}>`,
       to: user.email,
       subject: "Verify your email",
       html: `<p>Click <a href="${verifyUrl}">here</a> to verify your email.</p>`,

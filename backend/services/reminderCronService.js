@@ -41,7 +41,7 @@ WHERE d.last_date = CURRENT_DATE + INTERVAL '1 day'
 
         for (const doc of rows) {
             const mailOptions = {
-                from: process.env.EMAIL_USER,
+                from: `"LegalDocs" <${process.env.EMAIL_USER}>`,
                 to: doc.email,
                 subject: "📌 Reminder: Document deadline is tomorrow",
                 text: `Hello! Your document "${doc.title}" is due on ${doc.last_date}. Please take necessary action.`,

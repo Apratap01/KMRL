@@ -46,7 +46,7 @@ export const registerUser = async (req, res) => {
         const transporter = await createTransporter();
 
         let info = await transporter.sendMail({
-            from: process.env.EMAIL_USER,
+            from: `"LegalDocs" <${process.env.EMAIL_USER}>`,
             to: newUser.rows[0].email,
             subject: "Verify your email",
             text: `Hello ${name}! Click here to verify your email: ${verificationLink}`,

@@ -66,7 +66,7 @@ const AILegalChatbot = () => {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_DOCS_API_ENDPOINT}/get-all-docs`, {
+        const { data } = await axios.get(`${import.meta.env.VITE_DOCS_API_ENDPOINT}/get-dept-docs`, {
           withCredentials: true,
         });
 

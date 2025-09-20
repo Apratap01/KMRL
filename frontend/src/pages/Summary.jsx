@@ -61,7 +61,7 @@ const languages = [
 /* ========= COMPONENT ========= */
 const Summary = () => {
 
-  const {SelectedDoc} = useSelector((state) => state.auth);
+  const { SelectedDoc } = useSelector((state) => state.auth);
   const location = useLocation();
   const docId = location.state?.docId || SelectedDoc;
   console.log(SelectedDoc);
@@ -82,7 +82,7 @@ const Summary = () => {
   const [showMobileDocsList, setShowMobileDocsList] = useState(false);
   const [expandedSections, setExpandedSections] = useState(Array(7).fill(true));
 
-  const [isRegenerating,setisRegenerating] = useState(false);
+  const [isRegenerating, setisRegenerating] = useState(false);
 
   const handleRegenerate = async () => {
     if (!selectedDoc) return;
@@ -95,14 +95,16 @@ const Summary = () => {
     } catch (e) {
       setError(
         e?.response?.data?.error ||
-          e?.message ||
-          "Failed to regenerate summary. Please try again."
+        e?.message ||
+        "Failed to regenerate summary. Please try again."
       );
     } finally {
       setisRegenerating(false);
     }
   };
 
+  const { user } = useSelector(state => state.auth);
+  const role = user.data.department;
 
   const toggleSection = (index) => {
     setExpandedSections((prev) =>
@@ -111,12 +113,12 @@ const Summary = () => {
   };
 
   const getUrgencyColor = (level) => {
-  switch (level?.toLowerCase()) {
-    case "high": return "bg-red-600";
-    case "medium": return "bg-yellow-500";
-    default: return "bg-green-500";
-  }
-};
+    switch (level?.toLowerCase()) {
+      case "high": return "bg-red-600";
+      case "medium": return "bg-yellow-500";
+      default: return "bg-green-500";
+    }
+  };
 
   /* ====== Load Docs on Mount ====== */
   useEffect(() => {
@@ -127,56 +129,57 @@ const Summary = () => {
   }, []);
 
   useEffect(() => {
-  const loadDocs = async () => {
-    console.log(SelectedDoc);
-    setDocsLoading(true);
-    setDocsError(null);
-    try {
-      const { data } = await axios.get(`${import.meta.env.VITE_DOCS_API_ENDPOINT}/get-all-docs`, {
-        withCredentials: true,
-      });
+    const loadDocs = async () => {
+      console.log(SelectedDoc);
+      setDocsLoading(true);
+      setDocsError(null);
+      try {
+        const { data } = await axios.get(`${import.meta.env.VITE_DOCS_API_ENDPOINT}/get-dept-docs`, {
+          withCredentials: true,
+        });
 
-      const list = (data?.result || []).map((d, idx) => ({
-        id: d.id,
-        title: d.title,
-        type: mapMimeToType(d.file_type),
-        date: formatDate(d.uploaded_at),
-        avatar: (d.title?.[0] || "D").toUpperCase(),
-        gradient: pickGradient(d.id ?? idx),
-        raw: d,
-      }));
-      setDocs(list);
+        const list = (data?.result || []).map((d, idx) => ({
+          id: d.id,
+          title: d.title,
+          type: mapMimeToType(d.file_type),
+          date: formatDate(d.uploaded_at),
+          avatar: (d.title?.[0] || "D").toUpperCase(),
+          gradient: pickGradient(d.id ?? idx),
+          raw: d,
+        }));
+        setDocs(list);
 
-      // ✅ Auto-select if docId prop is passed
-      if (docId) {
-        const match = list.find((doc) => doc.id === docId);
-        if (match) {
-          handleDocumentSelect(match);
+        // ✅ Auto-select if docId prop is passed
+        if (docId) {
+          const match = list.find((doc) => doc.id === docId);
+          if (match) {
+            handleDocumentSelect(match);
+          }
         }
-      }
-    } catch (e) {
-      setDocsError(
-        e?.response?.data?.message ||
+      } catch (e) {
+        setDocsError(
+          e?.response?.data?.message ||
           e?.message ||
           "Failed to load documents. Please login again."
-      );
-    } finally {
-      setDocsLoading(false);
-    }
-  };
-  loadDocs();
-}, [docId]); // ✅ re-run if docId changes
+        );
+      } finally {
+        setDocsLoading(false);
+      }
+    };
+    loadDocs();
+  }, [docId]); // ✅ re-run if docId changes
 
 
   /* ====== API: Get Summary ====== */
-const fetchSummary = async (docId, languageCode) => {
-  const { data } = await axios.post(`${import.meta.env.VITE_SUMMARY_API_ENDPOINT}/${docId}`, {
-    language: languageCode,
-  }, {
-    withCredentials: true,
-  });
-  return data;
-};
+  const fetchSummary = async (docId, languageCode) => {
+    const { data } = await axios.post(`${import.meta.env.VITE_SUMMARY_API_ENDPOINT}/${docId}`, {
+      language: languageCode,
+      department: role
+    }, {
+      withCredentials: true,
+    });
+    return data;
+  };
 
   const RegenerateSummary = async (docId, languageCode) => {
     const { data } = await axios.post(`${import.meta.env.VITE_SUMMARY_API_ENDPOINT}/regenerate/${docId}`, {
@@ -199,8 +202,8 @@ const fetchSummary = async (docId, languageCode) => {
     } catch (e) {
       setError(
         e?.response?.data?.error ||
-          e?.message ||
-          "Failed to load summary. Please try again."
+        e?.message ||
+        "Failed to load summary. Please try again."
       );
       setSummaryData(null);
     } finally {
@@ -215,13 +218,15 @@ const fetchSummary = async (docId, languageCode) => {
       setIsLoading(true);
       setError(null);
       try {
+        console.log(selectedDoc.id);
+        console.log(lang.code);
         const summary = await fetchSummary(selectedDoc.id, lang.code);
         setSummaryData(summary);
       } catch (e) {
         setError(
           e?.response?.data?.error ||
-            e?.message ||
-            "Failed to load summary for the selected language."
+          e?.message ||
+          "Failed to load summary for the selected language."
         );
       } finally {
         setIsLoading(false);
@@ -264,11 +269,10 @@ const fetchSummary = async (docId, languageCode) => {
             {docs.map((doc) => (
               <div
                 key={doc.id}
-                className={`p-4 rounded-xl cursor-pointer transition-all transition-colors duration-300 flex-shrink-0 border-2 ${
-                  selectedDoc?.id === doc.id
+                className={`p-4 rounded-xl cursor-pointer transition-all transition-colors duration-300 flex-shrink-0 border-2 ${selectedDoc?.id === doc.id
                     ? "bg-gradient-to-r from-purple-100 to-indigo-100 border-indigo-400/50"
                     : "bg-gradient-to-r from-white to-indigo-50 border-transparent hover:from-indigo-50 hover:to-purple-50"
-                } ${showLanguageDropdown ? "ring-1 ring-blue-400 shadow-md" : ""}`}
+                  } ${showLanguageDropdown ? "ring-1 ring-blue-400 shadow-md" : ""}`}
                 onClick={() => handleDocumentSelect(doc)}
               >
                 <div className="flex items-center gap-4">
@@ -336,29 +340,28 @@ const fetchSummary = async (docId, languageCode) => {
                   </div>
 
                   {/* LANGUAGE DROPDOWN */}
+                  {/* Language Dropdown */}
                   <div className="relative">
                     <button
-                      className="flex items-center gap-2 px-4  py-2 shadow-lg hover:bg-gray-100 transition bg-white/20 hover:bg-white/30 rounded-lg transition-colors border border-gray-200/20"
-                      onClick={() =>
-                        setShowLanguageDropdown(!showLanguageDropdown)
-                      }
+                      onClick={() => setShowLanguageDropdown((prev) => !prev)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-md border border-gray-200 hover:bg-gray-50 transition"
                     >
-                      <Languages className="w-4 h-4" />
-                      <span className="text-sm font-medium">
-                        {selectedLanguage.flag} {selectedLanguage.name}
-                      </span>
+                      <span>{selectedLanguage.flag}</span>
+                      <span className="hidden sm:inline">{selectedLanguage.name}</span>
                       <ChevronDown className="w-4 h-4" />
                     </button>
 
                     {showLanguageDropdown && (
-                      <div className="absolute top-full mt-2 right-0 bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-[170px] z-10">
+                      <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                         {languages.map((lang) => (
                           <button
                             key={lang.code}
-                            className={`w-full px-4 py-2 text-left flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100 ${
-                              selectedLanguage.code === lang.code ? "bg-gray-100 font-semibold" : ""
-                            }`}
-                            onClick={() => handleLanguageChange(lang)}
+                            className={`w-full px-4 py-2 text-left flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-100 ${selectedLanguage.code === lang.code ? "bg-gray-100 font-semibold" : ""
+                              }`}
+                            onClick={(e) => {
+                              e.stopPropagation(); // ✅ Prevent overlay from closing too early
+                              handleLanguageChange(lang);
+                            }}
                           >
                             <span>{lang.flag}</span>
                             <span>{lang.name}</span>
@@ -367,7 +370,19 @@ const fetchSummary = async (docId, languageCode) => {
                       </div>
                     )}
                   </div>
-                  {/* Regenerate Button*/ }
+
+                  {/* Overlay for closing */}
+                  {(showLanguageDropdown || showMobileDocsList) && (
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => {
+                        setShowLanguageDropdown(false);
+                        setShowMobileDocsList(false);
+                      }}
+                    />
+                  )}
+
+                  {/* Regenerate Button*/}
                   <button
                     className="flex items-center gap-2 px-4 py-2 shadow-lg hover:bg-gray-100 transition bg-white/20 hover:bg-white/30 rounded-lg border border-gray-200/20"
                     onClick={handleRegenerate}
@@ -405,9 +420,8 @@ const fetchSummary = async (docId, languageCode) => {
                     {[...Array(8)].map((_, i) => (
                       <div key={i} className="animate-pulse">
                         <div
-                          className={`h-4 bg-gray-300/50 dark:bg-gray-600/50 rounded ${
-                            i === 3 || i === 7 ? "w-3/4" : "w-full"
-                          }`}
+                          className={`h-4 bg-gray-300/50 dark:bg-gray-600/50 rounded ${i === 3 || i === 7 ? "w-3/4" : "w-full"
+                            }`}
                         />
                       </div>
                     ))}
@@ -415,184 +429,270 @@ const fetchSummary = async (docId, languageCode) => {
                 ) : (
                   <div className="w-full space-y-6 -mt-4">
                     {/* 1. Document Summary */}
-                    <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
-                      <CardContent className="p-0">
-                        <div
-                          className="flex items-center justify-between cursor-pointer p-4"
-                          onClick={() => toggleSection(0)}
-                        >
-                          <div className="flex items-center gap-3">
-                            {expandedSections[0] ? (
-                              <ChevronDown className="h-5 w-5 text-blue-600" />
-                            ) : (
-                              <ChevronRight className="h-5 w-5 text-blue-600" />
-                            )}
-                            <h2 className="text-lg font-semibold text-gray-900">
-                              Document Summary
-                            </h2>
-                          </div>
-                        </div>
-                        {expandedSections[0] && (
-                          <div className="border-t border-gray-200">
-                            <div className="p-6 text-gray-700 leading-relaxed">
-                              {summaryData.description}
+                    {summaryData.description && (
+                      <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
+                        <CardContent className="p-0">
+                          <div
+                            className="flex items-center justify-between cursor-pointer p-4"
+                            onClick={() => toggleSection(0)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {expandedSections[0] ? (
+                                <ChevronDown className="h-5 w-5 text-blue-600" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-blue-600" />
+                              )}
+                              <h2 className="text-lg font-semibold text-gray-900">
+                                Document Summary
+                              </h2>
                             </div>
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    {/* 2. Key Information */}
-                    <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
-                      <CardContent className="p-0">
-                        <div
-                          className="flex items-center justify-between cursor-pointer p-4"
-                          onClick={() => toggleSection(1)}
-                        >
-                          <div className="flex items-center gap-3">
-                            {expandedSections[1] ? (
-                              <ChevronDown className="h-5 w-5 text-green-600" />
-                            ) : (
-                              <ChevronRight className="h-5 w-5 text-green-600" />
-                            )}
-                            <h2 className="text-lg font-semibold text-gray-900">
-                              Key Information
-                            </h2>
-                          </div>
-                        </div>
-                        {expandedSections[1] && (
-                          <div className="border-t border-gray-200">
-                            <ul className="p-6 space-y-2 text-gray-700">
-                              {summaryData.important_timeline?.map((info, i) => (
-                                <li key={i}>• {info}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-
-                    {/* 3. Risks (with Category & Urgency) */}
-                    <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
-                      <CardContent className="p-0">
-                        <div
-                          className="flex items-center justify-between cursor-pointer p-4"
-                          onClick={() => toggleSection(2)}
-                        >
-                          <div className="flex items-center gap-3">
-                            {expandedSections[2] ? (
-                              <ChevronDown className="h-5 w-5 text-red-600" />
-                            ) : (
-                              <ChevronRight className="h-5 w-5 text-red-600" />
-                            )}
-                            <h2 className="text-lg font-semibold text-gray-900">
-                              Risks & Document Info
-                            </h2>
-                          </div>
-                        </div>
-                        {expandedSections[2] && (
-                          <div className="border-t border-gray-200 p-6 space-y-4 text-gray-700">
-                            {/* Risks */}
-                            <ul className="space-y-2">
-                              {summaryData.risk_factors?.map((risk, i) => (
-                                <li key={i}>⚠️ {risk}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                    {/* Urgency Card*/ }
-                    <Card className="mb-6 shadow-md border border-gray-200 bg-white hover:shadow-lg transition">
-                      <CardContent className="p-0">
-                        <div className="flex items-center justify-between cursor-pointer p-4" onClick={() => toggleSection(3)}>
-                          <div className="flex items-center gap-3">
-                            {expandedSections[3] ? <ChevronDown className="h-5 w-5 text-blue-600"/> : <ChevronRight className="h-5 w-5 text-blue-600"/>}
-                            <h2 className="text-lg font-semibold text-gray-900">Urgency of Risk ⚠</h2>
-                          </div>
-                        </div>
-                        {expandedSections[3] && (
-                          <div className="border-t border-gray-200">
-                            <div className="p-6">
-                              <div className="flex items-center gap-4 mb-4">
-                                <div className="text-2xl font-bold text-red-600">{summaryData.urgency_percentage}%</div>
-                                <div className="flex-1">
-                                  <div className="w-full bg-gray-200 rounded-full h-3">
-                                    <div
-                                        className={`h-3 rounded-full ${getUrgencyColor(summaryData.urgency_level)}`}
-                                        style={{ width: `${summaryData.urgency_percentage}%` }}
-                                      ></div>
-            
-                                  </div>
-                                </div>
-                                <span className="text-red-600 font-semibold">{summaryData.urgency_level} Priority</span>
+                          {expandedSections[0] && (
+                            <div className="border-t border-gray-200">
+                              <div className="p-6 text-gray-700 leading-relaxed">
+                                {summaryData.description}
                               </div>
-                              
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* 2. Deadlines */}
+                    {summaryData.deadlines?.length > 0 && (
+                      <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
+                        <CardContent className="p-0">
+                          <div
+                            className="flex items-center justify-between cursor-pointer p-4"
+                            onClick={() => toggleSection(1)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {expandedSections[1] ? (
+                                <ChevronDown className="h-5 w-5 text-green-600" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-green-600" />
+                              )}
+                              <h2 className="text-lg font-semibold text-gray-900">Deadlines</h2>
                             </div>
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                    {/* 4. Next Steps */}
-                    <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
-                      <CardContent className="p-0">
-                        <div
-                          className="flex items-center justify-between cursor-pointer p-4"
-                          onClick={() => toggleSection(4)}
-                        >
-                          <div className="flex items-center gap-3">
-                            {expandedSections[4] ? (
-                              <ChevronDown className="h-5 w-5 text-purple-600" />
-                            ) : (
-                              <ChevronRight className="h-5 w-5 text-purple-600" />
-                            )}
-                            <h2 className="text-lg font-semibold text-gray-900">
-                              Next Steps
-                            </h2>
-                          </div>
-                        </div>
-                        {expandedSections[4] && (
-                          <div className="border-t border-gray-200">
-                            <ul className="p-6 space-y-2 text-gray-700">
-                              {summaryData.next_steps?.map((step, i) => (
-                                <li key={i}>➡️ {step}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                          {expandedSections[1] && (
+                            <div className="border-t border-gray-200">
+                              <ul className="p-6 space-y-2 text-gray-700">
+                                {summaryData.deadlines.map((deadline, i) => (
+                                  <li key={i}>📅 {deadline}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
 
-                    {/* 5. Recommendations */}
-                    <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
-                      <CardContent className="p-0">
-                        <div
-                          className="flex items-center justify-between cursor-pointer p-4"
-                          onClick={() => toggleSection(5)}
-                        >
-                          <div className="flex items-center gap-3">
-                            {expandedSections[5] ? (
-                              <ChevronDown className="h-5 w-5 text-indigo-600" />
-                            ) : (
-                              <ChevronRight className="h-5 w-5 text-indigo-600" />
-                            )}
-                            <h2 className="text-lg font-semibold text-gray-900">
-                              Recommendations
-                            </h2>
+                    {/* 3. Key Points */}
+                    {summaryData.key_points?.length > 0 && (
+                      <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
+                        <CardContent className="p-0">
+                          <div
+                            className="flex items-center justify-between cursor-pointer p-4"
+                            onClick={() => toggleSection(2)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {expandedSections[2] ? (
+                                <ChevronDown className="h-5 w-5 text-purple-600" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-purple-600" />
+                              )}
+                              <h2 className="text-lg font-semibold text-gray-900">Key Points</h2>
+                            </div>
                           </div>
-                        </div>
-                        {expandedSections[5] && (
-                          <div className="border-t border-gray-200">
-                            <ul className="p-6 space-y-2 text-gray-700">
-                              {summaryData.main_takeaway?.map((rec, i) => (
-                                <li key={i}>✅ {rec}</li>
-                              ))}
-                            </ul>
+                          {expandedSections[2] && (
+                            <div className="border-t border-gray-200">
+                              <ul className="p-6 space-y-2 text-gray-700">
+                                {summaryData.key_points.map((point, i) => (
+                                  <li key={i}>• {point}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* 4. Urgency */}
+                    {summaryData.urgency_level && (
+                      <Card className="mb-6 shadow-md border border-gray-200 bg-white hover:shadow-lg transition">
+                        <CardContent className="p-0">
+                          <div
+                            className="flex items-center justify-between cursor-pointer p-4"
+                            onClick={() => toggleSection(3)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {expandedSections[3] ? (
+                                <ChevronDown className="h-5 w-5 text-red-600" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-red-600" />
+                              )}
+                              <h2 className="text-lg font-semibold text-gray-900">Urgency</h2>
+                            </div>
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                          {expandedSections[3] && (
+                            <div className="border-t border-gray-200">
+                              <div className="p-6 text-gray-700">
+                                <span className="font-semibold text-red-600">
+                                  {summaryData.urgency_level}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* 5. Involved Personnel */}
+                    {summaryData.involved_personnel?.length > 0 && (
+                      <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
+                        <CardContent className="p-0">
+                          <div
+                            className="flex items-center justify-between cursor-pointer p-4"
+                            onClick={() => toggleSection(4)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {expandedSections[4] ? (
+                                <ChevronDown className="h-5 w-5 text-indigo-600" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-indigo-600" />
+                              )}
+                              <h2 className="text-lg font-semibold text-gray-900">
+                                Involved Personnel
+                              </h2>
+                            </div>
+                          </div>
+                          {expandedSections[4] && (
+                            <div className="border-t border-gray-200">
+                              <ul className="p-6 space-y-2 text-gray-700">
+                                {summaryData.involved_personnel.map((person, i) => (
+                                  <li key={i}>👤 {person}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* 6. Compliance Risks */}
+                    {summaryData.compliance_risks && (
+                      <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
+                        <CardContent className="p-0">
+                          <div
+                            className="flex items-center justify-between cursor-pointer p-4"
+                            onClick={() => toggleSection(5)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {expandedSections[5] ? (
+                                <ChevronDown className="h-5 w-5 text-yellow-600" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-yellow-600" />
+                              )}
+                              <h2 className="text-lg font-semibold text-gray-900">
+                                Compliance Risks
+                              </h2>
+                            </div>
+                          </div>
+                          {expandedSections[5] && (
+                            <div className="border-t border-gray-200 p-6 text-gray-700">
+                              {summaryData.compliance_risks}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* 7. Financial Implications */}
+                    {summaryData.financial_implications && (
+                      <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
+                        <CardContent className="p-0">
+                          <div
+                            className="flex items-center justify-between cursor-pointer p-4"
+                            onClick={() => toggleSection(6)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {expandedSections[6] ? (
+                                <ChevronDown className="h-5 w-5 text-green-700" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-green-700" />
+                              )}
+                              <h2 className="text-lg font-semibold text-gray-900">
+                                Financial Implications
+                              </h2>
+                            </div>
+                          </div>
+                          {expandedSections[6] && (
+                            <div className="border-t border-gray-200 p-6 text-gray-700">
+                              {summaryData.financial_implications}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* 8. Actionable Items */}
+                    {summaryData.actionable_items && (
+                      <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
+                        <CardContent className="p-0">
+                          <div
+                            className="flex items-center justify-between cursor-pointer p-4"
+                            onClick={() => toggleSection(7)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {expandedSections[7] ? (
+                                <ChevronDown className="h-5 w-5 text-blue-700" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-blue-700" />
+                              )}
+                              <h2 className="text-lg font-semibold text-gray-900">
+                                Actionable Items
+                              </h2>
+                            </div>
+                          </div>
+                          {expandedSections[7] && (
+                            <div className="border-t border-gray-200 p-6 text-gray-700">
+                              {summaryData.actionable_items}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* 9. Equipment Details */}
+                    {summaryData.equipment_details && (
+                      <Card className="shadow-md border border-gray-200 bg-white hover:shadow-lg transition w-full">
+                        <CardContent className="p-0">
+                          <div
+                            className="flex items-center justify-between cursor-pointer p-4"
+                            onClick={() => toggleSection(8)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {expandedSections[8] ? (
+                                <ChevronDown className="h-5 w-5 text-gray-600" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-gray-600" />
+                              )}
+                              <h2 className="text-lg font-semibold text-gray-900">
+                                Equipment Details
+                              </h2>
+                            </div>
+                          </div>
+                          {expandedSections[8] && (
+                            <div className="border-t border-gray-200 p-6 text-gray-700">
+                              {summaryData.equipment_details}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
                   </div>
+
                 )}
               </div>
             </>

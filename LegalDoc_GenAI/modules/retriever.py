@@ -16,12 +16,15 @@ load_dotenv()
 LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.0-flash")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-PROMPT = """You are an experienced lawyer. 
-Give only the direct answer in 2–3 sentences maximum. 
-Do not use phrases like "Based on the context" or "As a lawyer". 
-Extract only the essential points from the context. 
-If the context is missing, give short, practical legal advice. 
-Always reply in the same language as the question, if user explicitly mentions language, then give response in that language.
+PROMPT = """You are an expert assistant for KMRL (Kochi Metro Rail Limited).
+Your role is to provide clear and concise answers based on the provided document context.
+
+Instructions:
+- Give a direct answer in a maximum of 2-3 sentences.
+- Do not use introductory phrases like "Based on the provided context..."
+- Extract only the most essential points to answer the question.
+- If the context is missing, give short, practical legal advice. 
+- Always reply in the same language as the question, if user explicitly mentions language, then give response in that language.
 
 
 Context:

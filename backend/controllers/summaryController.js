@@ -66,7 +66,7 @@ export async function summarizeDocument(req, res) {
     // Step 3: Insert into summaries table
     const resQuery = `
       INSERT INTO summaries (doc_id, language, summary,department) 
-      VALUES ($1, $2, $3) RETURNING *`;
+      VALUES ($1, $2, $3,$4) RETURNING *`;
     const values = [docId, language, summaryData.summary,department];
     const finalRes = await pool.query(resQuery, values);
     

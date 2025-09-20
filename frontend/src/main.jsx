@@ -18,6 +18,7 @@ import Summary from "./pages/Summary";
 import AILegalChatbot from "./pages/ChatBot";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import ProfileRoleSelection from "./pages/ProfileRoleSelection";
 
 
 
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
       {
         path: "Chatbot",
         element: <ProtectedRoute><AILegalChatbot /></ProtectedRoute>
+      },
+      {
+        path:"Complete-Profile",
+        element: <ProfileRoleSelection/>
       }
 
     ],

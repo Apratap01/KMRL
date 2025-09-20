@@ -37,7 +37,7 @@ function Signup() {
       console.log(res)
       console.log(res.status)
       console.log(res.data)
-
+      const userId = res.data.userId
       const { email, name, password } = inputValue
 
       if (!name) {
@@ -64,7 +64,7 @@ function Signup() {
       }
 
       if (res.status === 201) {
-        Navigate("/login")
+        Navigate("/Complete-Profile",{ state: { userId: userId } })
         toast.success("Registration Successful! Please verify your email.")
       }
     } catch (error) {

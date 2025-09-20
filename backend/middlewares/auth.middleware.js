@@ -49,11 +49,6 @@ export const verifyJWT = async (req, res, next) => {
             return res.status(401).json({ message: "Account not verified. Please verify your email." });
         }
 
-        if(!user.department){
-            console.log("User has no specific department")
-            return res.status(401).json({ message: "No department assigned to user . Please complete your profile" });
-        }
-
         req.user = user;
         console.log("User authenticated successfully:", user.email);
         next();

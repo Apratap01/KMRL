@@ -10,7 +10,7 @@ import { pool } from '../config/db.js';
 import { s3 } from '../routes/docs.routes.js';
 
 export async function summarizeDocument(req, res) {
-  const { language } = req.body;
+  const { language ,department} = req.body;
   const docId = req.params.id;
 
   const result = await pool.query(`SELECT file_key,issummarygenerated FROM docs WHERE id=$1 `, [docId])
@@ -61,7 +61,7 @@ export async function summarizeDocument(req, res) {
     });
 
     // Step 2: Call FastAPI service
-    const summaryData = await getSummaryFromFastAPI({ path: tempFilePath }, language);
+    const summaryData = await getSummaryFromFastAPI({ path: tempFilePath }, language,department);
 
     // Step 3: Insert into summaries table
     const resQuery = `
@@ -69,21 +69,13 @@ export async function summarizeDocument(req, res) {
       VALUES ($1, $2, $3) RETURNING *`;
     const values = [docId, language, summaryData.summary];
     const finalRes = await pool.query(resQuery, values);
-
-    // Step 4: Update docs table with is_summarised = true
-    const risk_factor = summaryData.summary.urgency_percentage
-    console.log(risk_factor)
     
     await pool.query(
       `UPDATE docs SET issummarygenerated = true WHERE id = $1`,
       [docId]
     );
 
-    await pool.query(
-      `UPDATE docs SET risk_factor = $1 WHERE id = $1`,
-      [risk_factor]
-    );
-
+    
     res.status(200).json(finalRes.rows[0].summary);
   } catch (error) {
     console.error('Summary API error:', error.message);
@@ -98,7 +90,7 @@ export async function summarizeDocument(req, res) {
 }
 
 export async function regenerateSummary(req, res) {
-  const { language } = req.body
+  const { language ,department} = req.body
   const docId = req.params.id
   const result = await pool.query(`SELECT file_key,issummarygenerated FROM docs WHERE id=$1 `, [docId])
   const fileKey = result.rows[0]?.file_key;
@@ -140,25 +132,17 @@ export async function regenerateSummary(req, res) {
     });
 
     // Step 2: Call FastAPI service
-    const summaryData = await getSummaryFromFastAPI({ path: tempFilePath }, language);
+    const summaryData = await getSummaryFromFastAPI({ path: tempFilePath }, language,department);
 
     // Step 3: Insert into summaries table
     const resQuery = `UPDATE summaries SET summary = $1 WHERE doc_id = $2 AND language = $3 RETURNING *`
 
     const finalRes = await pool.query(resQuery,[summaryData.summary,docId,language])
 
-    const risk_factor = summaryData.summary.urgency_percentage
-    console.log(risk_factor)
-
     // Step 4: Update docs table with is_summarised = true
     await pool.query(
       `UPDATE docs SET issummarygenerated = true WHERE id = $1`,
       [docId]
-    );
-
-    await pool.query(
-      `UPDATE docs SET risk_factor = $1 WHERE id = $2`,
-      [risk_factor,docId]
     );
 
     res.status(200).json(finalRes.rows[0].summary);

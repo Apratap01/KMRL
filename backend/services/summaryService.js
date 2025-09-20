@@ -6,11 +6,12 @@ import fs from 'fs';
 // The URL of your FastAPI server
 const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:8000';
 
-export async function getSummaryFromFastAPI(file, language) {
+export async function getSummaryFromFastAPI(file, language,department) {
   try {
     const formData = new FormData();
     formData.append('file', fs.createReadStream(file.path));
     formData.append('language', language);
+    formData.append('department',department)
 
     const response = await axios.post(`${FASTAPI_URL}/summarize/`, formData, {
       headers: {

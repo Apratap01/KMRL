@@ -17,8 +17,8 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
     raise ValueError("GOOGLE_API_KEY environment variable not found. Please set it in your .env file.")
 
-from summarizer import generate_document_summary, extract_last_date
-from models import SummaryResponse, LegalDocSummary, LastDateResponse,ChatRequest
+from summarizer import generate_document_summary, extract_last_date, predict_department
+from models import SummaryResponse, KmrlDocSummary, LastDateResponse, ChatRequest, DepartmentPredictionResponse
 from utils import extract_text_from_pdf
 from modules.chunking import file_to_chunks
 from modules.embedding_store import (
@@ -148,8 +148,7 @@ async def chat_with_docs(request: ChatRequest):
 # --- Summarizer Endpoints ---
 
 @app.post("/summarize/", response_model=SummaryResponse)
-async def summarize_document(file: UploadFile = File(...), language: str = Form(...)):
-    # ... (no change, existing code for summarization) ...
+async def summarize_document(file: UploadFile = File(...), language: str = Form(...), department: str = Form(...)):
     file_location = f"temp/{file.filename}"
     Path(file_location).parent.mkdir(parents=True, exist_ok=True)
     
@@ -161,14 +160,14 @@ async def summarize_document(file: UploadFile = File(...), language: str = Form(
         if not document_content:
             raise HTTPException(status_code=400, detail="Could not extract text from the document.")
 
-        summary_result: LegalDocSummary = generate_document_summary(document_content, language, GOOGLE_API_KEY)
+        summary_result: KmrlDocSummary = generate_document_summary(document_content, language, department, GOOGLE_API_KEY)
         
         logger.info("--- Document Summary ---")
         logger.info(summary_result.model_dump_json(indent=2))
         
         return SummaryResponse(
             summary=summary_result,
-            is_summarized=False
+            is_summarized=True 
         )
     except Exception as e:
         logger.error(f"An internal error occurred: {e}", exc_info=True)
@@ -177,8 +176,33 @@ async def summarize_document(file: UploadFile = File(...), language: str = Form(
         if os.path.exists(file_location):
             os.remove(file_location)
 
+# --- New Endpoint for Department Prediction ---
+@app.post("/predict-department/", response_model=DepartmentPredictionResponse)
+async def predict_department_endpoint(file: UploadFile = File(...)):
+    file_location = f"temp/{file.filename}"
+    Path(file_location).parent.mkdir(parents=True, exist_ok=True)
+    
+    try:
+        with open(file_location, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
 
-# --- New Endpoint for Date Extraction ---
+        document_content = extract_text_from_pdf(file_location)
+        if not document_content:
+            raise HTTPException(status_code=400, detail="Could not extract text from the document.")
+
+        prediction = predict_department(document_content, GOOGLE_API_KEY)
+        
+        return prediction
+    except Exception as e:
+        logger.error(f"An error occurred during department prediction: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="An internal error occurred during department prediction.")
+    finally:
+        if os.path.exists(file_location):
+            os.remove(file_location)
+
+
+
+# ---  Endpoint for Date Extraction ---
 @app.post("/extract-last-date/", response_model=LastDateResponse)
 async def extract_date_from_document(file: UploadFile = File(...)):
     """

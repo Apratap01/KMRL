@@ -67,7 +67,7 @@ const EmptyState = () => (
     </motion.div>
     <h3 className="text-2xl font-bold text-gray-800 mb-3">No documents uploaded yet</h3>
     <p className="text-gray-500 text-center max-w-md mb-8 text-lg">
-      Start building your document library! Upload files and manage them all in one place.
+      Start your document library! Upload files and manage them all in one place.
     </p>
   </motion.div>
 );

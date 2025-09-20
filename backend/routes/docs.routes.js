@@ -29,7 +29,7 @@ export const s3 = new S3Client({
 });
 
 
-const FASTAPI_URL = process.env.FASTAPI_URL ||'http://localhost:8000'; // Define FastAPI URL
+const FASTAPI_URL = process.env.FASTAPI_URL || 'http://localhost:8000'; // Define FastAPI URL
 
 async function downloadFileFromSignedUrl(signedUrl, destPath) {
   const writer = fs.createWriteStream(destPath);
@@ -55,70 +55,125 @@ router.post("/upload", verifyJWT, upload.single("docs"), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    console.log("file:",req.file)
-    console.log("body:",req.body)
+
+    console.log("file:", req.file);
+    console.log("body:", req.body);
+
     const fileKey = `${Date.now()}_${req.file.originalname}`;
 
+    // Upload to S3
     const params = {
       Bucket: bucketName,
       Key: fileKey,
       Body: req.file.buffer,
       ContentType: req.file.mimetype,
     };
-
     const command = new PutObjectCommand(params);
     await s3.send(command);
 
     const userId = req.user.id;
-    let lastDate = null; // Initialize lastdate
+    let lastDate = null;
 
-    // --- NEW: Call FastAPI to extract the last date ---
+    // --- Extract last_date from FastAPI ---
     try {
       const formData = new FormData();
-      formData.append('file', req.file.buffer, req.file.originalname);
+      formData.append("file", req.file.buffer, req.file.originalname);
 
-      const dateResponse = await axios.post(`${FASTAPI_URL}/extract-last-date/`, formData, {
-        headers: {
-          ...formData.getHeaders(),
-        },
-      });
+      const dateResponse = await axios.post(
+        `${FASTAPI_URL}/extract-last-date/`,
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders(),
+          },
+        }
+      );
       lastDate = dateResponse.data.last_date;
-      console.log(FASTAPI_URL)
       console.log(`Extracted last date: ${lastDate}`);
     } catch (llmError) {
       console.error("Error extracting date from document:", llmError.message);
     }
-    // --- END NEW ---
 
-
-    const query = `
+    // --- Save document in docs table ---
+    const insertDocQuery = `
       INSERT INTO docs (user_id, title, file_key, file_type)
       VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
-    const values = [userId, req.file.originalname, fileKey, req.file.mimetype];
+    const docValues = [
+      userId,
+      req.file.originalname,
+      fileKey,
+      req.file.mimetype,
+    ];
 
-    const result = await pool.query(query, values);
+    const result = await pool.query(insertDocQuery, docValues);
+    const docId = result.rows[0].id;
 
-    // --- NEW: Schedule a task for email notification if a date was found ---
-    console.log(typeof (lastDate))
-    const isoDate = new Date(lastDate).toISOString();
+    // --- Update last_date if found ---
     if (lastDate) {
-      await pool.query(`UPDATE docs SET last_date = $1 WHERE id = $2`, [isoDate, result.rows[0].id])
-      // await runTask(userId, result.rows[0].id, lastDate);
+      const isoDate = new Date(lastDate).toISOString();
+      await pool.query(
+        `UPDATE docs SET last_date = $1 WHERE id = $2`,
+        [isoDate, docId]
+      );
     }
-    // --- END NEW ---
 
-    const finalResult = await pool.query(`SELECT * FROM docs WHERE id = $1`, [result.rows[0].id])
+    // --- Call GenAI server to get related departments ---
+    let relatedDepartments = [];
+    try {
+      const formData = new FormData();
+      formData.append("file", req.file.buffer, req.file.originalname);
+
+      const genAiResponse = await axios.post(
+        `${FASTAPI_URL}/predict-department/`,
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders(),
+          },
+        }
+      );
+      console.log(genAiResponse.data)
+      relatedDepartments = genAiResponse.data.predicted_departments;
+    } catch (genAiError) {
+      console.error("Error getting related departments:", genAiError.message);
+
+      // fallback: assign user’s own department
+      const userDeptResult = await pool.query(
+        `SELECT department FROM users WHERE id = $1`,
+        [userId]
+      );
+      relatedDepartments = [userDeptResult.rows[0].department];
+    }
+
+    // --- Insert into department_docs ---
+    for (const dept of relatedDepartments) {
+      await pool.query(
+        `INSERT INTO department_docs (department, doc_id) VALUES ($1, $2)`,
+        [dept, docId]
+      );
+    }
+
+    // --- Fetch final doc ---
+    const finalResult = await pool.query(
+      `SELECT * FROM docs WHERE id = $1`,
+      [docId]
+    );
+
     return res.status(201).json({
       message: "File uploaded successfully",
       doc: finalResult.rows[0],
+      departments: relatedDepartments,
     });
   } catch (error) {
     console.error("Upload error:", error);
-    return res.status(500).json({ message: "File upload failed", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "File upload failed", error: error.message });
   }
 });
+
 
 router.get('/get-all-docs', verifyJWT, async (req, res) => {
   try {
@@ -130,6 +185,19 @@ router.get('/get-all-docs', verifyJWT, async (req, res) => {
     console.log(error.message)
     return res.status(500).send('Server error in getting docs')
 
+  }
+})
+
+router.get('/get-dept-docs', verifyJWT, async (req, res) => {
+  try {
+    const department = req.user.department
+    const result = await pool.query(`SELECT dep.doc_id AS id,d.title,d.file_type,d.uploaded_at FROM department_docs dep JOIN docs d ON dep.doc_id = d.id WHERE dep.department = $1`, [department])
+    console.log(result.rows)
+    return res.status(200).json({ "result": result.rows })
+  }
+  catch (error) {
+    console.log(error.message)
+    return res.status(500).send('Server error in getting docs')
   }
 })
 

@@ -39,7 +39,11 @@ function Login() {
         navigate("/resend-verification")
         toast.message("Please Verify Your email");
       }
-
+      const userId = res.data.user.userId;
+      if(!(res.data.user.department)){
+        navigate("/Complete-Profile",{ state: { userId: userId } });
+        toast.message("First Define Your Role")
+      }
       // Example navigation after login
       else if (res.status === 200) {
         toast.success("Login Successfull")

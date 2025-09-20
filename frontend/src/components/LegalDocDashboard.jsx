@@ -76,7 +76,7 @@ const LegalDocDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-[#03070e] to-[#050448] relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-r from-[#03070e] to-[#050448] relative overflow-hidden mt-13">
       {/* Background Effects */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>

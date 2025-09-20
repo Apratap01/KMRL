@@ -16,7 +16,7 @@ export async function summarizeDocument(req, res) {
   const result = await pool.query(`SELECT file_key,issummarygenerated FROM docs WHERE id=$1 `, [docId])
   const fileKey = result.rows[0]?.file_key;
 
-  const result2 = await pool.query(`SELECT summary,language FROM summaries WHERE doc_id = $1 AND language = $2`, [docId, language])
+  const result2 = await pool.query(`SELECT summary,language,department FROM summaries WHERE doc_id = $1 AND language = $2 AND department=$3`, [docId, language,department])
 
   if (result2.rows.length > 0) {
     console.log('Summary Already exists')
@@ -65,9 +65,9 @@ export async function summarizeDocument(req, res) {
 
     // Step 3: Insert into summaries table
     const resQuery = `
-      INSERT INTO summaries (doc_id, language, summary) 
+      INSERT INTO summaries (doc_id, language, summary,department) 
       VALUES ($1, $2, $3) RETURNING *`;
-    const values = [docId, language, summaryData.summary];
+    const values = [docId, language, summaryData.summary,department];
     const finalRes = await pool.query(resQuery, values);
     
     await pool.query(
@@ -135,9 +135,9 @@ export async function regenerateSummary(req, res) {
     const summaryData = await getSummaryFromFastAPI({ path: tempFilePath }, language,department);
 
     // Step 3: Insert into summaries table
-    const resQuery = `UPDATE summaries SET summary = $1 WHERE doc_id = $2 AND language = $3 RETURNING *`
+    const resQuery = `UPDATE summaries SET summary = $1 WHERE doc_id = $2 AND language = $3 AND department = $4 RETURNING *`
 
-    const finalRes = await pool.query(resQuery,[summaryData.summary,docId,language])
+    const finalRes = await pool.query(resQuery,[summaryData.summary,docId,language,department])
 
     // Step 4: Update docs table with is_summarised = true
     await pool.query(

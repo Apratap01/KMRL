@@ -35,12 +35,14 @@ function Login() {
       // console.log(res.status);
       // console.log(res.data);
       // console.log(typeof res.data.user.is_valid);
+      
+      console.log(res.data.user)
+      const userId = res.data.user.id;
       if(!(res.data.user.is_valid)){
         navigate("/resend-verification")
         toast.message("Please Verify Your email");
       }
-      const userId = res.data.user.userId;
-      if(!(res.data.user.department)){
+      else if(!(res.data.user.department)){
         navigate("/Complete-Profile",{ state: { userId: userId } });
         toast.message("First Define Your Role")
       }

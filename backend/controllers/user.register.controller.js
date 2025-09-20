@@ -89,6 +89,7 @@ export const registerUser = async (req, res) => {
         await sendVerificationEmail(newUser.rows[0].email, name, verificationLink);
 
         res.status(201).json({
+            userId:newUser.rows[0].id,
             message: "User registered successfully. Please check your email to verify.",
         });
 

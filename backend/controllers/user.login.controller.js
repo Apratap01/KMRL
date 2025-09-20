@@ -48,7 +48,7 @@ export const loginUser = async (req, res) => {
 
 
         const loggedInUser = await pool.query(
-            "SELECT id,email,name,is_valid FROM users WHERE email = $1",
+            "SELECT id,email,name,is_valid,department FROM users WHERE email = $1",
             [email]
         );
 

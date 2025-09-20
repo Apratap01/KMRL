@@ -34,7 +34,7 @@ export const verifyJWT = async (req, res, next) => {
         const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
         const result = await pool.query(
-            "SELECT id, email, is_valid, name FROM users WHERE id = $1",
+            "SELECT id, email, is_valid,department, name FROM users WHERE id = $1",
             [decodedToken?.id]
         );
 
@@ -47,6 +47,11 @@ export const verifyJWT = async (req, res, next) => {
         if (user.is_valid === false) {
             console.log("User account not verified:", user.email);
             return res.status(401).json({ message: "Account not verified. Please verify your email." });
+        }
+
+        if(!user.department){
+            console.log("User has no specific department")
+            return res.status(401).json({ message: "No department assigned to user . Please complete your profile" });
         }
 
         req.user = user;

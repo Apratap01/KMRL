@@ -1,1 +1,0 @@
-ALTER TABLE docs ADD COLUMN conversation_id VARCHAR(255) DEFAULT NULL;

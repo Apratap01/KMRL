@@ -11,6 +11,7 @@ import { fetchUserData } from '../controllers/user.controller.js'
 import { handleGoogleSignIn } from '../controllers/user.google.controller.js'
 import { forgotPassword } from '../controllers/user.forgot.js'
 import { changePassword } from '../controllers/user.change_password.js'
+import { completeProfile } from '../controllers/user.complete-profile.js'
 
 
 dotenv.config()
@@ -27,6 +28,7 @@ router.get('/fetch-user-data',verifyJWT,fetchUserData)
 router.post('/google',handleGoogleSignIn)
 router.post('/forgot-password',forgotPassword)
 router.post('/change-password/:token',changePassword)
+router.post('/complete-profile',completeProfile)
 
 export default router;
 
